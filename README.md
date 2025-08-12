@@ -1,4 +1,4 @@
-# INFLUX-UG-1
+# INFLUX-UI-UG-1
 
 ## Team members
 - Christina Nguyen a1797406
