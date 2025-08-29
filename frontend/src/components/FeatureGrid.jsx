@@ -4,7 +4,7 @@ import GraphLogo from '../images/Graph_Logo.png';
 import QueryLogo from '../images/Query_Logo.png';
 import FeatureCard from './FeatureCard';
 
-function FeatureGrid() {
+export default function FeatureGrid() {
   const features = [
     {
       image: QueryLogo,
@@ -40,5 +40,3 @@ function FeatureGrid() {
     </div>
   );
 }
-
-export default FeatureGrid;

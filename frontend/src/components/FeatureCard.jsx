@@ -1,4 +1,4 @@
-function FeatureCard({ image, title, description, alt }) {
+export default function FeatureCard({ image, title, description, alt }) {
   return (
     <div className="feature-card">
       <div className="feature-icon">
@@ -9,5 +9,3 @@ function FeatureCard({ image, title, description, alt }) {
     </div>
   );
 }
-
-export default FeatureCard;

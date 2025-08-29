@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function NavBar() {
+export default function NavBar() {
   const [theme, setTheme] = useState('dark');
 
   const toggleTheme = () => {
@@ -27,5 +27,3 @@ function NavBar() {
     </nav>
   );
 }
-
-export default NavBar;
