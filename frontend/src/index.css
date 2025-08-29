@@ -34,6 +34,12 @@ body.light-mode .navbar {
   /* for light mode */
 }
 
+.nav-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
 /* buttons */
 .theme-toggle,
 .nav-login-btn,
@@ -103,10 +109,10 @@ body.light-mode .welcome-title {
   border-radius: 16px;
   width: 100%;
   max-width: 900px;         /* cap width on large screens */
-  padding: 24px 32px;       
+  padding: 24px 32px;
   margin-bottom: 40px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
-  height: auto;             
+  height: auto;
   box-sizing: border-box;
   text-align: center;
   /* ensure padding is included in height/width */
