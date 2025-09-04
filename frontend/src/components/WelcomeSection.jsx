@@ -1,9 +1,8 @@
-import { useState } from 'react';
-import Modal from './Modal/Modal';
+// import { useState } from 'react';
 
-export default function WelcomeSection() {
+export default function WelcomeSection({onOpenAuth}) {
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isAuthOpen, setAuthOpen] = useState(false);
 
   return (
     <div className="welcome-section">
@@ -16,18 +15,11 @@ export default function WelcomeSection() {
       <div className="login-prompt">
         <h3>Get Started</h3>
         <p>Sign in with your InfluxDB account to access your data and start building queries visually.</p>
-        <button className="big-login-btn" onClick={() => setIsModalOpen(true)}>Login to Continue</button>
-      </div>
-
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <h2>Log In / Sign Up</h2>
-        <br></br>
-        <p>Insert login form here</p>
-        <br></br>
-        <button className="big-login-btn" onClick={()=> alert('Login submitted!')}>
-          Login
+        <button className="big-login-btn" onClick={onOpenAuth}>
+          Sign Up / Log In
         </button>
-      </Modal>
+        {/* <AuthModal isOpen={isAuthOpen} onClose={() => setAuthOpen(false)} /> */}
+      </div>
     </div>
   );
 }

@@ -27,7 +27,7 @@ body {
 }
 
 
-/*  DARK MODE COMPONENTS  */
+/* === DARK MODE === */
 
 /* NAVIGATION BAR */
 .navbar {
@@ -356,7 +356,7 @@ body {
 }
 
 
-/* VISUALISATION SECTINO */
+/* VISUALISATION SECTION */
 
 .visualization-section {
   display: grid;
@@ -385,7 +385,7 @@ body {
 
 
 
-/*  LIGHT MODE  */
+/* === LIGHT MODE === */
 
 /* BODY */
 

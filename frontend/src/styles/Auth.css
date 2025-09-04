@@ -1,0 +1,195 @@
+/* === AUTH MODAL === */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  background: #111111;
+  border: 1px solid rgba(8, 7, 7, 0.2);
+  backdrop-filter: blur(15px);
+  padding: 2rem;
+  border-radius: 16px;
+  width: 400px;
+  max-width: 95%;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  background: white;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+/* === FORM === */
+
+.auth-form .form-group {
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.auth-form label {
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  transition: border 0.3s ease, background 0.3s ease;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #fe954f;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* === LOGIN/SIGNUP BUTTONS === */
+
+.btn-primary {
+  background: linear-gradient(135deg, #fe954f 0%, #fe6a00 100%);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  margin-top: 10px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 15px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(254, 122, 0, 0.4);
+}
+
+
+/* === LOGIN WITH INFLUXDB/GRAFANA === */
+
+/* OAuth button container */
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  /* margin-top: 1.5rem; */
+}
+
+/* Neutral button base */
+.btn-oauth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  color: #333;
+  width: 100%;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.btn-oauth img.oauth-logo {
+  width: 20px;
+  height: 20px;
+}
+
+/* Hover effect consistent with inputs + primary btn */
+.btn-oauth:hover {
+  background: #f1f1f1;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+}
+
+.divider {
+  padding: 20px;
+  text-align: center;
+}
+
+/* === SIGNUP/LOGIN SWITCH === */
+
+.switch-text {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.switch-text .switch-account {
+  font-size: 15px;
+}
+.switch-text .switch-link {
+  color: #fe954f;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.switch-text .switch-link:hover {
+  color: #fe6a00;
+}

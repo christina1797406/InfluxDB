@@ -1,7 +1,9 @@
 import { useState } from 'react';
+// import AuthModal from './AuthModal';
 
-export default function NavBar() {
+export default function NavBar({onOpenAuth}) {
   const [theme, setTheme] = useState('dark');
+  // const [isAuthOpen, setAuthOpen] = useState(false);
 
   const toggleTheme = () => {
     if (theme === 'dark') {
@@ -22,7 +24,8 @@ export default function NavBar() {
         <button className="theme-toggle" onClick={toggleTheme}>
           {theme === 'dark' ? 'Dark' : 'Light'}
         </button>
-        <button className="nav-login-btn">Login</button>
+        <button className="nav-login-btn" onClick={onOpenAuth}>Login</button>
+        {/* <AuthModal isOpen={isAuthOpen} onClose={() => setAuthOpen(false)} /> */}
       </div>
     </nav>
   );
