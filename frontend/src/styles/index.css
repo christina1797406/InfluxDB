@@ -53,7 +53,7 @@ body {
 }
 
 /* buttons */
-.theme-toggle, .nav-login-btn {
+.theme-toggle, .nav-login-btn, .nav-logout-btn {
   background: linear-gradient(100deg, #fe924f 0%, orange 100%);
   padding: 0.5rem 1.5rem;
   border: none;
@@ -75,7 +75,7 @@ body {
   min-width: 200px;
 }
 
-.theme-toggle:hover, .nav-login-btn:hover, .big-login-btn:hover {
+.theme-toggle:hover, .nav-login-btn:hover, .nav-logout-btn:hover, .big-login-btn:hover {
   transform: translateY(-2px);
 }
 
@@ -472,6 +472,7 @@ body.light-mode .nav-brand {
 
 /* Buttons */
 body.light-mode .nav-login-btn,
+body.light-mode .nav-logout-btn,
 body.light-mode .big-login-btn,
 body.light-mode .theme-toggle {
   background: linear-gradient(200deg, #2e2e2e, #fe7b00);
@@ -482,6 +483,7 @@ body.light-mode .theme-toggle {
 
 body.light-mode .theme-toggle:hover,
 body.light-mode .nav-login-btn:hover,
+body.light-mode .nav-logout-btn:hover,
 body.light-mode .big-login-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(254, 123, 0, 0.4);

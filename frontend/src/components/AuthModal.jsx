@@ -10,17 +10,45 @@ export default function AuthModal({isOpen, onClose}) {
         email: "",
         password: "",
     });
+    const [message, setMessage] = useState("");
 
     const handleChange = (e) => {
         setFormData({...formData, [e.target.name]: e.target.value});
     };
 
-    const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(`${mode} data:`, formData);
-    // call backend API depending on mode
-    // POST /api/auth/login or POST /api/auth/signup
-    onClose();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log(`${mode} data:`, formData);
+        setMessage("");
+
+        try {
+            const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
+            const res = await fetch(`http://localhost:5001${endpoint}`,{
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email: formData.email, password: formData.password}),
+            });
+
+            const data = await res.json();
+            // localStorage.setItem('token', data.token);
+
+            if (res.ok) {
+                if (mode === "login") {
+                    localStorage.setItem("token", data.token);
+                    setMessage("Login successful!");
+                } else {
+                    setMessage("Account created!");
+                }
+                // onClose();
+                window.location.reload();
+            } else {
+                setMessage("❌ " + data.msg)
+            }
+        } catch (error) {
+            console.error(error);
+            setMessage("Server error, please try again.");
+        }
+        // onClose();
     };
 
     if (!isOpen) return null;
@@ -72,6 +100,8 @@ export default function AuthModal({isOpen, onClose}) {
                 {mode === "login" ? "Log In" : "Sign Up"}
             </button>
         </form>
+
+        {message && <p className="auth-message">{message}</p>}
 
         <div className="divider">
             or
