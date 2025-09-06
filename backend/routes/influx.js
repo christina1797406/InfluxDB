@@ -1,5 +1,5 @@
 const express = require('express');
-const { bucketsAPI } = require('../config/influx.config');
+const { bucketsAPI } = require('../utils/influx.config');
 
 const router = express.Router();
 
