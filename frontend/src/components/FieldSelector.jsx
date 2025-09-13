@@ -1,22 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const dummyFields = [
-    { type: "TAG", name: "location" },
-    { type: "TAG", name: "sensor_id" },
-    { type: "FIELD", name: "temperature" },
-    { type: "FIELD", name: "humidity" },
-    { type: "TAG", name: "building" },
-    { type: "FIELD", name: "pressure" },
-    { type: "TAG", name: "room" },
-    { type: "FIELD", name: "battery_level" },
-    { type: "TAG", name: "device_type" },
-    { type: "FIELD", name: "signal_strength" },
-    { type: "FIELD", name: "cpu_usage" },
-];
-
-export default function FieldSelector() {
+export default function FieldSelector({ bucket, measurement }) {
+    // variables search, fields, and filtered fields
     const [search, setSearch] = useState("");
-    const filteredFields = dummyFields.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
+    const [fields, setFields] = useState([]);
+    const filteredFields = fields.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
+    // Fetch fields when bucket or (doesn't work) -> measurement changes
+    useEffect(() => {
+        // Function to fetch fields from backend (Not tested yet)
+        const fetchFields = async () => {
+            try {
+                const response = await fetch(`http://localhost:5001/api/influx/fields/${bucket}/${measurement}`);
+                const data = await response.json();
+                setFields(data);
+            } catch (error) {
+                console.error('Error fetching fields:', error);
+            }
+        };
+
+        if (bucket && measurement) {
+            fetchFields();
+        }
+    }, [bucket, measurement]);
 
     return (
         <div className="card">
