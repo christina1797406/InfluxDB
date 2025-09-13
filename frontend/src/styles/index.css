@@ -745,20 +745,65 @@ body.light-mode .drag-drop-area.drag-over {
 }
 
 body.light-mode .chart-container {
-  background: rgba(255, 255, 255, 0.95);
-  color: #2d3748;
-  border: 1px solid rgba(226, 232, 240, 0.5);
+  background: linear-gradient(135deg, #e3eafc 0%, #f8fafc 100%) !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1;
 }
 
-body.light-mode .toggle-slider {
-  background-color: rgba(203, 213, 225, 0.8);
-  border: 1px solid rgba(160, 174, 192, 0.6);
+/* --- LIGHT MODE FIXES --- */
+
+body.light-mode .btn-primary,
+body.light-mode .theme-toggle,
+body.light-mode .nav-login-btn,
+body.light-mode .nav-logout-btn,
+body.light-mode .big-login-btn {
+  background: linear-gradient(135deg, #3182ce 0%, #5a67d8 100%) !important;
+  color: #fff !important;
+  border: none;
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.2);
 }
 
-body.light-mode input:checked+.toggle-slider {
-  background-color: #3182ce;
-  border-color: #3182ce;
+body.light-mode .btn-primary:hover,
+body.light-mode .theme-toggle:hover,
+body.light-mode .nav-login-btn:hover,
+body.light-mode .nav-logout-btn:hover,
+body.light-mode .big-login-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
+  color: #fff !important;
 }
+
+body.light-mode .card-title,
+body.light-mode .tab,
+body.light-mode .dashboard-tab {
+  color: #2563eb !important;
+}
+
+body.light-mode .tab.active,
+body.light-mode .dashboard-tab.active {
+  color: #fff !important;
+  background: linear-gradient(135deg, #3182ce 0%, #5a67d8 100%) !important;
+}
+
+body.light-mode .tab:not(.active),
+body.light-mode .dashboard-tab:not(.active) {
+  color: #2563eb !important;
+  background: rgba(248, 250, 252, 0.8) !important;
+}
+
+body.light-mode .chart-container {
+  background: linear-gradient(135deg, #e3eafc 0%, #f8fafc 100%) !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1;
+}
+
+/* Optionally, for better contrast, you can darken the chart container a bit more: */
+/*
+body.light-mode .chart-container {
+  background: linear-gradient(135deg, #e0e7ef 0%, #f1f5fa 100%) !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1;
+}
+*/
 
 /* -------------------- */
 
