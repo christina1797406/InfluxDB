@@ -6,11 +6,11 @@ The purpose of this application is to bridge the gap between data collection and
 - Integrated with Grafana
 - Multiple dashbaord tabs
 - Toggle option for light and dark mode
--  
+-  Secure authentication and authorization
 
 ## Tech Stack
 - Framework: React
-- 
+- ect
 
 ## Installation and Setup
 Complete the following steps to install and setup the InfluxDB UI.
