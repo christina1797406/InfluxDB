@@ -13,7 +13,7 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
         fetchBuckets();
     }, []);
 
-    // Fetch measurements when selectedBucket changes - currently not working for some reasons
+    // Fetch measurements when selectedBucket changes - fixed
     useEffect(() => {
         if (selectedBucket) {
             fetchMeasurements(selectedBucket);
@@ -30,7 +30,7 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
             setError("Failed to fetch buckets");
         }
     };
-    // Currently not working but its a function to fetch the measurements based on selected bucket
+    // Fixed: its a function to fetch the measurements based on selected bucket
     const fetchMeasurements = async (bucket) => {
         try {
             const response = await fetch(

@@ -7,7 +7,7 @@ export default function FieldSelector({ bucket, measurement }) {
     const filteredFields = fields.filter(f => f.name.toLowerCase().includes(search.toLowerCase()));
     // Fetch fields when bucket or (doesn't work) -> measurement changes
     useEffect(() => {
-        // Function to fetch fields from backend (Not tested yet)
+        // Function to fetch fields from backend (Seems to be working)
         const fetchFields = async () => {
             try {
                 const response = await fetch(`http://localhost:5001/api/influx/fields/${bucket}/${measurement}`);
