@@ -358,12 +358,43 @@ body {
   gap: 24px;
 }
 
+/* Prevent grid reflow when inputs have long content */
 .query-section {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* allow columns to shrink */
   gap: 24px;
+  align-items: start;
 }
 
+/* Ensure grid children can shrink below content size */
+.card,
+.left-stack {
+  min-width: 0;
+}
+
+/* Data Source: keep controls from expanding the card */
+.data-source-card {
+  min-height: 220px; /* from earlier fix; adjust as needed */
+}
+.data-source-card .form-group {
+  min-width: 0;
+  overflow: hidden; /* clip any accidental overflow */
+}
+.data-source-card select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis; /* visual guard; some browsers ignore on select but harmless */
+  white-space: nowrap;
+}
+
+/* Stack DataSource + TimeControls in the first quarter */
+.left-stack {
+  display: grid;
+  grid-auto-rows: min-content;
+  gap: 24px; /* space between the two cards */
+}
 
 /* VISUALISATION SECTION */
 
@@ -398,7 +429,7 @@ body {
   background: #1f1f1f;
   color: #f0f0f0;
   padding: 3rem;
-  margin-top: 10rem;
+  margin-top: 3rem;
 }
 
 .footer-content {
@@ -806,7 +837,8 @@ body.light-mode .big-login-btn:hover {
 }
 
 body.light-mode .btn-primary:hover {
-  box-shadow: 0 8px 25px rgba(49, 130, 206, 0.35) !important; /* darker blue for light mode */
+  box-shadow: 0 8px 25px rgba(49, 130, 206, 0.35) !important;
+  /* darker blue for light mode */
 }
 
 body.light-mode .card-title,
@@ -936,16 +968,20 @@ body.light-mode .chart-container {
 }
 
 body.light-mode .field-type {
-  background: #2563eb !important; /* darker blue */
+  background: #2563eb !important;
+  /* darker blue */
   color: #fff !important;
 }
+
 body.light-mode .field-type.tag {
-  background: #b7791f !important; /* darker gold/yellow */
+  background: #b7791f !important;
+  /* darker gold/yellow */
   color: #fff !important;
 }
 
 .drag-drop-area {
-  border: 2px dashed #fea94f !important; /* orange for dark mode */
+  border: 2px dashed #fea94f !important;
+  /* orange for dark mode */
   border-radius: 12px;
   padding: 50px;
   text-align: center;
@@ -963,7 +999,8 @@ body.light-mode .field-type.tag {
 body.light-mode .drag-drop-area {
   border-color: rgba(203, 213, 225, 0.6);
   background: rgba(248, 250, 252, 0.6);
-  border: 2px dashed #3182ce !important; /* blue for light mode */
+  border: 2px dashed #3182ce !important;
+  /* blue for light mode */
 }
 
 .drag-drop-area:hover,
@@ -1017,7 +1054,8 @@ body.light-mode .drag-drop-area {
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(254, 122, 0, 0.35) !important; /* dark orange for dark mode */
+  box-shadow: 0 8px 25px rgba(254, 122, 0, 0.35) !important;
+  /* dark orange for dark mode */
 }
 
 .btn-secondary {
@@ -1417,7 +1455,7 @@ body.light-mode .toggle-slider {
   border: 1px solid #9cb1cb !important;
 }
 
-body.light-mode input:checked + .toggle-slider {
+body.light-mode input:checked+.toggle-slider {
   background-color: #3182ce !important;
   border-color: #3182ce !important;
 }
@@ -1426,7 +1464,7 @@ body.light-mode .toggle-slider:before {
   background-color: #fff !important;
 }
 
-body.light-mode input:checked + .toggle-slider:before {
+body.light-mode input:checked+.toggle-slider:before {
   background-color: #fff !important;
 }
 
@@ -1446,7 +1484,7 @@ select:focus {
   font-size: 15px;
   transition: border 0.2s, box-shadow 0.2s;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 10px;
   position: relative;
 }
@@ -1476,7 +1514,7 @@ body.light-mode select:focus {
   background: #fff;
   color: #2d3748;
   border: 1px solid #bfc9d9;
-  box-shadow: 0 2px 8px rgba(49,130,206,0.08);
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.08);
   background-image: url("data:image/svg+xml;utf8,<svg fill='rgb(49,130,206)' height='18' viewBox='0 0 20 20' width='18' xmlns='http://www.w3.org/2000/svg'><path d='M7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z'/></svg>");
   background-repeat: no-repeat;
   background-position: right 12px center;
@@ -1486,4 +1524,199 @@ body.light-mode select:focus {
 body.light-mode select option {
   background: #f8fafc;
   color: #2d3748;
+}
+
+/* Builder controls layout */
+.controls-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkbox-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Filter + GroupBy drop zones */
+.drop-zone {
+  border: 2px dashed #fea94f;
+  /* orange in dark */
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.drop-zone:hover {
+  background: rgba(254, 181, 79, 0.08);
+}
+
+body.light-mode .drop-zone {
+  border: 2px dashed #3182ce !important;
+  background: rgba(248,250,252,0.7);
+}
+
+.drop-hint {
+  color: #888;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.muted {
+  color: #999;
+  font-size: 12px;
+}
+
+/* --- Make filter rows wrap and look professional --- */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: rgba(255,255,255,0.06);
+  min-width: 0;
+}
+
+.filter-row .chip,
+.filter-row .logic-select,
+.filter-row .op-select,
+.filter-row .value-input,
+.filter-row .btn-danger {
+  margin-right: 4px;
+  margin-bottom: 4px;
+  min-width: 0;
+}
+
+.filter-row .btn-danger,
+.chip-close {
+  background: #e53e3e !important; /* red button*/
+  color: #fff !important;
+  border: none;
+  font-size: 1rem;
+  padding: 0 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.filter-row .btn-danger:hover,
+.chip-close:hover {
+  background: #c53030 !important;
+}
+
+/* Pushes to the right side for the exit button */
+.filter-row .value-input {
+  flex: 1 1 120px;
+  min-width: 80px;
+  max-width: 200px;
+}
+
+.filter-row .logic-select,
+.filter-row .op-select,
+.filter-row .value-input {
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+}
+
+.filter-row .chip {
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(79, 172, 254, 0.35);
+}
+
+.chip.tag {
+  background: rgba(255, 193, 7, 0.35);
+}
+
+.chip.field {
+  background: rgba(79, 172, 254, 0.35);
+}
+
+.chip .chip-close {
+  margin-left: 6px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Group-by list */
+.group-by-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+body.light-mode .filter-row {
+  background: rgba(237, 242, 247, 0.8);
+}
+
+body.light-mode .filter-row .logic-select,
+body.light-mode .filter-row .op-select,
+body.light-mode .filter-row .value-input {
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  background: #fff;
+  color: #2d3748;
+}
+
+body.light-mode .chip {
+  color: #fff;
+}
+
+body.light-mode .chip.tag {
+  background: #b7791f;
+}
+
+body.light-mode .chip.field {
+  background: #2563eb;
+}
+
+body.light-mode .checkbox-inline {
+  color: #2d3748;
+}
+
+@media (max-width: 600px) {
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-row .chip,
+  .filter-row .logic-select,
+  .filter-row .op-select,
+  .filter-row .value-input,
+  .filter-row .btn-danger {
+    margin-right: 0;
+    margin-bottom: 6px;
+    width: 100%;
+    max-width: 100%;
+  }
 }
