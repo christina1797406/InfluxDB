@@ -4,11 +4,12 @@ import influxLogo from "../images/influxdb-logo.png";
 import "../styles/Auth.css";
 
 export default function AuthModal({ isOpen, onClose }) {
-    const [mode, setMode] = useState("login");
+    const [mode, setMode] = useState("influx-login");
     const [formData, setFormData] = useState({
-        username: "",
-        email: "",
-        password: "",
+        influxToken: "",
+        influxOrg: "",
+        grafanaToken: "",
+        grafanaOrgId: "",
     });
     const [message, setMessage] = useState("");
 
@@ -16,126 +17,147 @@ export default function AuthModal({ isOpen, onClose }) {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        console.log(`${mode} data:`, formData);
         setMessage("");
 
         try {
-            const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
-            const res = await fetch(`http://localhost:5001${endpoint}`, {
+            let url = "";
+            let body = {};
+
+            if (mode === "influx-login") {
+                url = "http://localhost:5001/api/auth/login/influx";
+                body = {
+                    influxToken: formData.influxToken,
+                    influxOrg: formData.influxOrg,
+                };
+            } else if (mode === "grafana-login") {
+                url = "http://localhost:5001/api/auth/login/grafana";
+                body = {
+                    grafanaToken: formData.grafanaToken,
+                    grafanaOrgId: formData.grafanaOrgId,
+                };
+            }
+
+            const res = await fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: formData.email, password: formData.password }),
+                body: JSON.stringify(body),
             });
 
             const data = await res.json();
-            // localStorage.setItem('token', data.token);
 
             if (res.ok) {
-                if (mode === "login") {
-                    localStorage.setItem("token", data.token);
-                    setMessage("Login successful!");
-                } else {
-                    setMessage("Account created!");
-                }
-                // onClose();
+                localStorage.setItem("token", data.token);
+                setMessage("Login successful!");
                 window.location.reload();
             } else {
-                setMessage("❌ " + data.msg)
+                setMessage(data.error || data.message || "Login failed");
             }
         } catch (error) {
             console.error(error);
-            setMessage("Server error, please try again.");
+            setMessage("Server error, please try again");
         }
-        // onClose();
     };
+
+    const renderForm = () => {
+
+        if (mode === "influx-login") {
+            return (
+                <form onSubmit={handleLogin} className="auth-form">
+                    <div className="form-group">
+                        <label>InfluxDB Token</label>
+                        <input
+                            type="text"
+                            name="influxToken"
+                            value={formData.influxToken}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>InfluxDB Org (optional)</label>
+                        <input
+                            type="text"
+                            name="influxOrg"
+                            value={formData.influxOrg || ""}
+                            onChange={handleChange}
+                            placeholder="Leave empty to use default"
+                        />
+                    </div>
+
+                    <button type="submit" className="btn-auth">
+                        Log In
+                    </button>
+                </form>
+            );
+            }
+
+            if (mode === "grafana-login") {
+                return (
+                    <form onSubmit={handleLogin} className="auth-form">
+                        <div className="form-group">
+                            <label>Grafana Service Account Token</label>
+                            <input
+                                type="text"
+                                name="grafanaToken"
+                                value={formData.grafanaToken}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Grafana Org ID</label>
+                            <input
+                                type="text"
+                                name="grafanaOrgId"
+                                value={formData.grafanaOrgId || ""}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <button type="submit" className="btn-auth">
+                            Log In
+                        </button>
+                    </form>
+                );
+        }
+    }
+
 
     if (!isOpen) return null;
 
     return (
         <div className="modal-overlay">
             <div className="modal">
-                <button className="modal-close" onClick={onClose}>x</button>
+                <button className="modal-close" onClick={onClose}>
+                x
+                </button>
 
-                <h2>{mode === "login" ? "Log In" : "Sign Up"}</h2>
+                <h2>
+                    {mode === "grafana-login" ? "Login with Grafana" : "Login with InfluxDB"}
+                </h2>
 
-                <form onSubmit={handleSubmit} className="auth-form">
-                    {mode === "signup" && (
-                        <div className="form-group">
-                            <label>Username</label>
-                            <input
-                                type="text"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                required
-                            />
-                        </div>
-                    )}
+                {renderForm()}
 
-                    <div className="form-group">
-                        <label>Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                <div>{message && <p className="auth-message">{message}</p>}</div>
 
-                    <div className="form-group">
-                        <label>Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <button type="submit" className="btn-auth">
-                        {mode === "login" ? "Log In" : "Sign Up"}
-                    </button>
-                </form>
-
-                {message && <p className="auth-message">{message}</p>}
-
-                <div className="divider">
-                    or
-                </div>
+                <div className="divider">or</div>
 
                 <div className="oauth-buttons">
-                    <button className="btn-oauth influx">
+                    {mode === "grafana-login" ?
+                    (<button className="btn-oauth influx" onClick={() => setMode("influx-login")}>
                         <img src={influxLogo} alt="InfluxDB" className="oauth-logo" />
                         Log in with InfluxDB
-                    </button>
-                    <button className="btn-oauth grafana">
+                    </button>)
+                    :
+                    (<button className="btn-oauth grafana" onClick={() => setMode("grafana-login")}>
                         <img src={grafanaLogo} alt="Grafana" className="oauth-logo" />
                         Log in with Grafana
-                    </button>
+                    </button>)
+                    }
                 </div>
-
-                <p className="switch-text">
-                    {mode === "login" ? (
-                        <>
-                            <span className="switch-account">Don’t have an account?{" "}</span>
-                            <span onClick={() => setMode("signup")} className="switch-link">
-                                Sign up here
-                            </span>
-                        </>
-                    ) : (
-                        <>
-                            <span className="switch-account">Already have an account?{" "}</span>
-                            <span onClick={() => setMode("login")} className="switch-link">
-                                Log in here
-                            </span>
-                        </>
-                    )}
-                </p>
             </div>
-        </div>
+    </div>
     );
 }

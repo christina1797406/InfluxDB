@@ -1,8 +1,4 @@
-// import { useState } from 'react';
-
 export default function WelcomeSection({ onOpenAuth }) {
-
-  // const [isAuthOpen, setAuthOpen] = useState(false);
 
   return (
     <div className="welcome-section">
@@ -16,9 +12,8 @@ export default function WelcomeSection({ onOpenAuth }) {
         <h3>Get Started</h3>
         <p>Sign in with your InfluxDB account to access your data and start building queries visually.</p>
         <button className="big-login-btn" onClick={onOpenAuth}>
-          Sign Up / Log In
+          Log In
         </button>
-        {/* <AuthModal isOpen={isAuthOpen} onClose={() => setAuthOpen(false)} /> */}
       </div>
     </div>
   );

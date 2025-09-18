@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
     // variables for buckets, measurements, selected values, and error handling
@@ -7,7 +7,7 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
     const [selectedBucket, setSelectedBucket] = useState("");
     const [selectedMeasurement, setSelectedMeasurement] = useState("");
     const [error, setError] = useState(null);
-    
+
     // Fetch buckets on component mount
     useEffect(() => {
         fetchBuckets();
@@ -24,7 +24,7 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
         try {
             const response = await fetch("http://localhost:5001/api/influx/buckets");
             const data = await response.json();
-            setBuckets(data);
+            setBuckets(data.buckets || []);
         } catch (error) {
             console.error("Error fetching buckets:", error);
             setError("Failed to fetch buckets");

@@ -1,9 +1,7 @@
 import { useState } from 'react';
-// import AuthModal from './AuthModal';
 
 export default function NavBar({ onOpenAuth, isLoggedIn, setLoggedIn }) {
   const [theme, setTheme] = useState('dark');
-  // const [isAuthOpen, setAuthOpen] = useState(false);
 
   const toggleTheme = () => {
     if (theme === 'dark') {

@@ -15,7 +15,7 @@ function App() {
 
   // Check if token exists in localStorage
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) setLoggedIn(true);
   }, []);
 
