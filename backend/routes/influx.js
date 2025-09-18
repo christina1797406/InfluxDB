@@ -1,30 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const { InfluxDB } = require('@influxdata/influxdb-client');
-const { influxDB, org, bucketsAPI } = require('../utils/influx.config');
 
-const getClientFromEnvIfNeeded = () => {
-  if (influxDB) return influxDB;
-  const url = process.env.INFLUX_URL;
-  const token = process.env.INFLUX_TOKEN;
-  if (url && token) return new InfluxDB({ url, token });
-  return null;
+
+const getClientFromUser = (req) => {
+  const influxToken = req.user?.influxToken;
+  const influxUrl = process.env.INFLUX_URL;
+  if (!influxUrl || !influxToken) return null;
+  return new InfluxDB({ url: influxUrl, token: influxToken });
 };
 
 // List measurements for a bucket (no time filter; robust row parsing)
 router.get('/measurements/:bucket', async (req, res) => {
   try {
     const bucket = req.params.bucket;
-    const client = getClientFromEnvIfNeeded();
-    const orgToUse = org || process.env.INFLUX_ORG;
+    const client = getClientFromUser(req);
+    const org = process.env.INFLUX_ORG;
 
-    if (!client || !orgToUse) {
-      return res.status(500).json({ message: 'Influx not configured' });
+    if (!client || !org) {
+      return res.status(500).json({ error: 'Influx not configured' });
     }
 
-    const queryApi = client.getQueryApi(orgToUse);
-
-    // Use schema.measurements to avoid time windows
+    const queryApi = client.getQueryApi(org);
     const query = `
       import "influxdata/influxdb/schema"
       schema.measurements(bucket: "${bucket}")
@@ -38,7 +35,6 @@ router.get('/measurements/:bucket', async (req, res) => {
       .filter(Boolean)
       .map(name => ({ name, id: name }));
 
-    // Fallback: if empty (older servers), try distinct over a wide range
     if (measurements.length === 0) {
       const fallbackQuery = `
         from(bucket: "${bucket}")
@@ -55,24 +51,26 @@ router.get('/measurements/:bucket', async (req, res) => {
     }
 
     res.json({ measurements });
+
   } catch (error) {
     console.error('Error fetching measurements:', error);
-    res.status(500).json({ message: 'Failed to fetch measurements', error: error?.message });
+    res.status(500).json({ error: 'Failed to fetch measurements'});
   }
 });
+
 
 // Fields/Tags for a measurement (robust row parsing)
 router.get('/fields/:bucket/:measurement', async (req, res) => {
   try {
     const { bucket, measurement } = req.params;
-    const client = getClientFromEnvIfNeeded();
-    const orgToUse = org || process.env.INFLUX_ORG;
+    const client = getClientFromUser(req);
+    const org = process.env.INFLUX_ORG;
 
-    if (!client || !orgToUse) {
-      return res.status(500).json({ message: 'Influx not configured' });
+    if (!client || !org) {
+      return res.status(500).json({ error: 'Influx not configured' });
     }
 
-    const queryApi = client.getQueryApi(orgToUse);
+    const queryApi = client.getQueryApi(org);
 
     const fieldQuery = `
       import "influxdata/influxdb/schema"
@@ -103,23 +101,30 @@ router.get('/fields/:bucket/:measurement', async (req, res) => {
     res.json([...fields, ...tags]);
   } catch (error) {
     console.error('Error fetching fields:', error);
-    res.status(500).json({ message: 'Failed to fetch fields', error: error?.message });
+    res.status(500).json({ error: 'Failed to fetch fields'});
   }
 });
 
 // Add /buckets route so frontend can fetch available buckets
 router.get('/buckets', async (req, res) => {
   try {
+    const client = getClientFromUser(req);
+    const org = process.env.INFLUX_ORG;
+
+    if (!client || !org) {
+      return res.status(500).json({ error: 'Influx not configured' });
+    }
+
     console.log('/buckets route hit');
-    const response = await bucketsAPI.getBuckets({ org });
-    const buckets = (response?.buckets || []).map(b => ({
-      id: b.id,
-      name: b.name
-    }));
+
+    const bucketsAPI = client.getBucketsApi();
+    const response = await bucketsAPI.getBuckets({org});
+    const buckets = (response?.buckets || []).map(b => ({id: b.id, name: b.name,}));
     res.json(buckets);
+
   } catch (error) {
     console.error('Error fetching buckets:', error);
-    res.status(500).json({ message: 'Failed to fetch buckets', error: error?.message });
+    res.status(500).json({ error: 'Failed to fetch buckets'});
   }
 });
 

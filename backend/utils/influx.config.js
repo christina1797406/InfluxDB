@@ -1,24 +1,31 @@
-// making sure that env vars are loaded when this module is required
 require('dotenv').config();
 
 const { InfluxDB } = require('@influxdata/influxdb-client');
 const { BucketsAPI } = require('@influxdata/influxdb-client-apis');
 
-// just for a cleaner look
-const INFLUX_URL = process.env.INFLUX_URL;
-const INFLUX_TOKEN = process.env.INFLUX_TOKEN;
-const INFLUX_ORG = process.env.INFLUX_ORG;
+/**
+ * Creates a new InfluxDB client and APIs.
+ * If no args are provided, falls back to .env defaults.
+ *
+ * @param {object} opts
+ * @param {string} opts.url
+ * @param {string} opts.token
+ * @param {string} [opts.org]
+ */
 
-if (!INFLUX_URL || !INFLUX_TOKEN) {
-  console.warn('Warning: INFLUX_URL or INFLUX_TOKEN not set. Influx client may not be configured.');
+function createInfluxClient(opts={}){
+  const url = opts.url || process.env.INFLUX_URL;
+  const token = opts.token || process.env.INFLUX_TOKEN;
+  const org = opts.org || process.env.INFLUX_ORG;
+
+  if (!url || !token) {
+    throw new Error('Influx client requires url and token');
+  }
+
+  const influxDB = new InfluxDB({url, token});
+  const bucketsAPI = new BucketsAPI(influxDB);
+
+  return {influxDB, org, bucketsAPI};
 }
 
-const influxDB = new InfluxDB({
-  url: INFLUX_URL,
-  token: INFLUX_TOKEN,
-});
-
-const org = INFLUX_ORG;
-const bucketsAPI = new BucketsAPI(influxDB);
-
-module.exports = { influxDB, org, bucketsAPI };
+module.exports = { createInfluxClient };
