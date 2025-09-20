@@ -19,22 +19,32 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
             fetchMeasurements(selectedBucket);
         }
     }, [selectedBucket]);
+
     // Function to fetch buckets from backend
     const fetchBuckets = async () => {
         try {
-            const response = await fetch("http://localhost:5001/api/influx/buckets");
+            const token = localStorage.getItem("token");
+            const response = await fetch("http://localhost:5001/api/influx/buckets", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             const data = await response.json();
-            setBuckets(data.buckets || []);
+            console.log("Buckets API response: ", data);
+            setBuckets(data || []);
+
         } catch (error) {
             console.error("Error fetching buckets:", error);
             setError("Failed to fetch buckets");
         }
     };
+
     // Fixed: its a function to fetch the measurements based on selected bucket
     const fetchMeasurements = async (bucket) => {
         try {
+            const token = localStorage.getItem("token");
             const response = await fetch(
-                `http://localhost:5001/api/influx/measurements/${bucket}`
+                `http://localhost:5001/api/influx/measurements/${bucket}`,{
+                    headers: { Authorization: `Bearer ${token}` },
+                }
             );
             const data = await response.json();
             setMeasurements(data.measurements || []); // Access the measurements array from the response
@@ -43,10 +53,12 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
             setError("Failed to fetch measurements");
         }
     };
+
     // error msg display
     if (error) {
         return <div className="error-message">{error}</div>;
     }
+
     // main return with dropdowns for bucket and measurement selection
     return (
         <div className="card data-source-card">

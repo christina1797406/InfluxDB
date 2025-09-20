@@ -3,24 +3,14 @@ const router = express.Router()
 const jwt = require('jsonwebtoken')
 const {createInfluxClient} = require('../utils/influx.config');
 
-function authMiddleware(req, res, next){
-    const authHeader = req.headers["authorization"];
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Missing or malformed token" });
-    }
-
-    const token = authHeader.split(" ")[1];
-    try {
-        req.user = jwt.verify(token, process.env.JWT_SECRET);
-        next();
-    } catch (error) {
-        return res.status(401).json({error: "Invalid or expired token"});
-    }
-}
-
 // LOGIN WITH INFLUXDB
 router.post('/login/influx', async(req,res)=>{
     const {influxToken, influxUrl, influxOrg} = req.body;
+
+    if (!influxToken) {
+        console.log("Missing InfluxDB token");
+        return res.status(400).json({error: "Missing InfluxDB token!"});
+    }
 
     try {
         // create client with user’s credentials
@@ -32,7 +22,20 @@ router.post('/login/influx', async(req,res)=>{
 
         // verify credentials by fetching buckets
         const buckets = await bucketsAPI.getBuckets({ org });
-        res.json({ success: true, buckets });
+        console.log("Buckets fetched:", buckets?.buckets?.length);
+
+        const token = jwt.sign(
+            {
+                influxToken,
+                influxUrl: influxUrl || process.env.INFLUX_URL,
+                influxOrg: influxOrg || process.env.INFLUX_ORG
+            },
+            process.env.JWT_SECRET,
+            {expiresIn: "1h"},
+        );
+
+        res.json({ success: true, token, buckets });
+
     } catch (err) {
         console.error(err);
         res.status(401).json({ success: false, message: 'Invalid Influx credentials' });
@@ -74,6 +77,7 @@ router.post('/login/grafana', async (req, res) => {
             {expiresIn: "1h"},
         );
 
+
         res.json({success:true, token, orgData});
 
     } catch (err) {
@@ -82,4 +86,4 @@ router.post('/login/grafana', async (req, res) => {
     }
 });
 
-module.exports = {router, authMiddleware};
+module.exports = {router};

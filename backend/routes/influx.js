@@ -1,27 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const { InfluxDB } = require('@influxdata/influxdb-client');
+const { BucketsAPI } = require('@influxdata/influxdb-client-apis');
+const authMiddleware = require('../middleware/authMiddleware');
 
 
-const getClientFromUser = (req) => {
-  const influxToken = req.user?.influxToken;
-  const influxUrl = process.env.INFLUX_URL;
+const getClientFromUser = (user) => {
+  if (!user) return null;
+
+  const { influxToken, influxUrl, influxOrg } = user;
   if (!influxUrl || !influxToken) return null;
-  return new InfluxDB({ url: influxUrl, token: influxToken });
+
+  const influxDB = new InfluxDB({ url: influxUrl, token: influxToken });
+  const bucketsAPI = new BucketsAPI(influxDB);
+
+  return { influxDB, bucketsAPI, org: influxOrg };
 };
 
 // List measurements for a bucket (no time filter; robust row parsing)
-router.get('/measurements/:bucket', async (req, res) => {
+router.get('/measurements/:bucket', authMiddleware, async (req, res) => {
   try {
     const bucket = req.params.bucket;
-    const client = getClientFromUser(req);
-    const org = process.env.INFLUX_ORG;
+    const client = getClientFromUser(req.user);
 
-    if (!client || !org) {
-      return res.status(500).json({ error: 'Influx not configured' });
+    if (!client){
+      console.error("Buckets route missing client", {client});
+      return res.status(400).json({ error: "No Influx client available" });
     }
 
-    const queryApi = client.getQueryApi(org);
+    const queryApi = client.influxDB.getQueryApi(client.org);
     const query = `
       import "influxdata/influxdb/schema"
       schema.measurements(bucket: "${bucket}")
@@ -60,17 +67,16 @@ router.get('/measurements/:bucket', async (req, res) => {
 
 
 // Fields/Tags for a measurement (robust row parsing)
-router.get('/fields/:bucket/:measurement', async (req, res) => {
+router.get('/fields/:bucket/:measurement', authMiddleware, async (req, res) => {
   try {
     const { bucket, measurement } = req.params;
-    const client = getClientFromUser(req);
-    const org = process.env.INFLUX_ORG;
+    const client = getClientFromUser(req.user);
 
-    if (!client || !org) {
+    if (!client) {
       return res.status(500).json({ error: 'Influx not configured' });
     }
 
-    const queryApi = client.getQueryApi(org);
+    const queryApi = client.influxDB.getQueryApi(client.org);
 
     const fieldQuery = `
       import "influxdata/influxdb/schema"
@@ -106,25 +112,29 @@ router.get('/fields/:bucket/:measurement', async (req, res) => {
 });
 
 // Add /buckets route so frontend can fetch available buckets
-router.get('/buckets', async (req, res) => {
-  try {
-    const client = getClientFromUser(req);
-    const org = process.env.INFLUX_ORG;
+router.get('/buckets', authMiddleware, async (req, res) => {
 
-    if (!client || !org) {
-      return res.status(500).json({ error: 'Influx not configured' });
+  console.log("Buckets req.user", req.user);
+
+  try {
+    const client = getClientFromUser(req.user);
+    // const org = client.org;
+
+    if (!client){
+      console.error("Buckets route missing client", {client});
     }
 
-    console.log('/buckets route hit');
+    console.log("/buckets route hit with org", client.org);
 
-    const bucketsAPI = client.getBucketsApi();
-    const response = await bucketsAPI.getBuckets({org});
+    const bucketsAPI = client.bucketsAPI;
+    const response = await bucketsAPI.getBuckets({org: client.org});
+    console.log("Buckets API raw response:", response);
     const buckets = (response?.buckets || []).map(b => ({id: b.id, name: b.name,}));
     res.json(buckets);
 
   } catch (error) {
     console.error('Error fetching buckets:', error);
-    res.status(500).json({ error: 'Failed to fetch buckets'});
+    res.status(500).json({ error: 'Failed to fetch buckets', details: error.message});
   }
 });
 

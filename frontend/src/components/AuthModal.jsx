@@ -32,7 +32,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     influxOrg: formData.influxOrg,
                 };
             } else if (mode === "grafana-login") {
-                url = "http://localhost:5001/api/auth/login/grafana";
+                url  = "http://localhost:5001/api/auth/login/grafana";
                 body = {
                     grafanaToken: formData.grafanaToken,
                     grafanaOrgId: formData.grafanaOrgId,
@@ -46,6 +46,11 @@ export default function AuthModal({ isOpen, onClose }) {
             });
 
             const data = await res.json();
+            if (data.success){
+                localStorage.setItem("token", data.token);
+            } else {
+                alert("Login failed");
+            }
 
             if (res.ok) {
                 localStorage.setItem("token", data.token);

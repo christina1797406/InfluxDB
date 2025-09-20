@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function FieldSelector({ bucket, measurement, onFieldDragStart }) {
     // variables search, fields, and filtered fields
@@ -10,11 +10,15 @@ export default function FieldSelector({ bucket, measurement, onFieldDragStart })
         // Function to fetch fields from backend (Seems to be working)
         const fetchFields = async () => {
             try {
-                const response = await fetch(`http://localhost:5001/api/influx/fields/${bucket}/${measurement}`);
+                const token = localStorage.getItem("token");
+                const response = await fetch(`http://localhost:5001/api/influx/fields/${bucket}/${measurement}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
                 const data = await response.json();
                 setFields(data);
             } catch (error) {
                 console.error('Error fetching fields:', error);
+                setFields([]);
             }
         };
 
