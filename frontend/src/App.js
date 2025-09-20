@@ -13,9 +13,9 @@ function App() {
   const [isAuthOpen, setAuthOpen] = useState(false);
   const [isLoggedIn, setLoggedIn] = useState(false);
 
-  // Check if token exists in localStorage
+  // Check if token exists in sessionStorage
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("accessToken");
     if (token) setLoggedIn(true);
   }, []);
 

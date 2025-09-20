@@ -3,6 +3,19 @@ const router = express.Router()
 const jwt = require('jsonwebtoken')
 const {createInfluxClient} = require('../utils/influx.config');
 
+const ACCESS_TOKEN_EXP = "1h";
+const REFRESH_TOKEN_EXP = "7d";
+
+function generateTokens(payload) {
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: ACCESS_TOKEN_EXP,
+    });
+    const refreshToken = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: REFRESH_TOKEN_EXP,
+    });
+    return { accessToken, refreshToken };
+}
+
 // LOGIN WITH INFLUXDB
 router.post('/login/influx', async(req,res)=>{
     const {influxToken, influxUrl, influxOrg} = req.body;
@@ -19,22 +32,25 @@ router.post('/login/influx', async(req,res)=>{
             token: influxToken,
             org: influxOrg,
         });
+        await bucketsAPI.getBuckets({org});
 
-        // verify credentials by fetching buckets
-        const buckets = await bucketsAPI.getBuckets({ org });
-        console.log("Buckets fetched:", buckets?.buckets?.length);
+        const payload = {
+            influxToken,
+            influxUrl: influxUrl || process.env.INFLUX_URL,
+            influxOrg: influxOrg || process.env.INFLUX_ORG,
+        };
 
-        const token = jwt.sign(
-            {
-                influxToken,
-                influxUrl: influxUrl || process.env.INFLUX_URL,
-                influxOrg: influxOrg || process.env.INFLUX_ORG
-            },
-            process.env.JWT_SECRET,
-            {expiresIn: "1h"},
-        );
+        const { accessToken, refreshToken } = generateTokens(payload);
 
-        res.json({ success: true, token, buckets });
+        // store refresh token in secure HttpOnly cookie
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res.json({ success: true, accessToken });
 
     } catch (err) {
         console.error(err);
@@ -53,7 +69,6 @@ router.post('/login/grafana', async (req, res) => {
 
     try {
         const grafanaUrl = process.env.GRAFANA_URL;
-
         const orgIdHeader = grafanaOrgId ? { "X-Grafana-Org-Id": grafanaOrgId } : {};
         const orgRes = await fetch(`${grafanaUrl}/api/org`, {
             headers: {Authorization: `Bearer ${grafanaToken}`,...orgIdHeader},
@@ -63,27 +78,53 @@ router.post('/login/grafana', async (req, res) => {
             return res.status(401).json({error: "Cannot fetch orgs for token", details: errData});
         }
 
-        let orgData = {};
-        try {
-            orgData = await orgRes.json();
-        } catch (err) {
-            orgData = {};
-        }
+        const orgData = await orgRes.json().catch(() => ({}));
 
+        const payload = { grafanaToken, org: orgData };
+        const { accessToken, refreshToken } = generateTokens(payload);
 
-        const token = jwt.sign(
-            {grafanaToken, org: orgData},
-            process.env.JWT_SECRET,
-            {expiresIn: "1h"},
-        );
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
-
-        res.json({success:true, token, orgData});
+        res.json({ success: true, accessToken, orgData });
 
     } catch (err) {
         console.error(err);
         res.status(500).json({error: "Grafana auth failed", details: err.message});
     }
+});
+
+router.post("/refresh", (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+        return res.status(401).json({ error: "Missing refresh token" });
+    }
+
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+        const { accessToken, refreshToken: newRefresh } = generateTokens(decoded);
+
+        res.cookie("refreshToken", newRefresh, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res.json({ success: true, accessToken });
+    } catch (error) {
+        return res.status(401).json({ error: "Invalid or expired refresh token" });
+    }
+});
+
+
+router.post("/logout", (req, res) => {
+    res.clearCookie("refreshToken");
+    res.json({ success: true, message: "Logged out" });
 });
 
 module.exports = {router};

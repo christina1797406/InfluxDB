@@ -6,7 +6,10 @@ const PORT = 5001;
 const influxRouter = require('./routes/influx');
 const {router: authRouter} = require('./routes/auth');
 
-app.use(cors());
+app.use(cors(({
+    origin: "http://localhost:3001",
+    credentials: true
+})));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 console.log('Loaded auth')

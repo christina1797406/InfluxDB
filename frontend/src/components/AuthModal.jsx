@@ -43,17 +43,14 @@ export default function AuthModal({ isOpen, onClose }) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
+                credentials: "include",
             });
 
             const data = await res.json();
-            if (data.success){
-                localStorage.setItem("token", data.token);
-            } else {
-                alert("Login failed");
-            }
 
+            console.log("Login response:", data);
             if (res.ok) {
-                localStorage.setItem("token", data.token);
+                sessionStorage.setItem("accessToken", data.accessToken);
                 setMessage("Login successful!");
                 window.location.reload();
             } else {

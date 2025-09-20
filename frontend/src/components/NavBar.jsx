@@ -18,7 +18,7 @@ export default function NavBar({ onOpenAuth, isLoggedIn, setLoggedIn }) {
   const handleLogout = () => {
     const confirmLogout = window.confirm("Are you sure you want to log out?");
     if (confirmLogout) {
-      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
       setLoggedIn(false);
       window.location.reload(); // ensures App.jsx shows landing page again
     }

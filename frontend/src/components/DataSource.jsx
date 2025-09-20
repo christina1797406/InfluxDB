@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 
 export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
     // variables for buckets, measurements, selected values, and error handling
@@ -23,10 +24,7 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
     // Function to fetch buckets from backend
     const fetchBuckets = async () => {
         try {
-            const token = localStorage.getItem("token");
-            const response = await fetch("http://localhost:5001/api/influx/buckets", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const response = await fetchWithAuth("http://localhost:5001/api/influx/buckets");
             const data = await response.json();
             console.log("Buckets API response: ", data);
             setBuckets(data || []);
@@ -40,12 +38,7 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
     // Fixed: its a function to fetch the measurements based on selected bucket
     const fetchMeasurements = async (bucket) => {
         try {
-            const token = localStorage.getItem("token");
-            const response = await fetch(
-                `http://localhost:5001/api/influx/measurements/${bucket}`,{
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
+            const response = await fetchWithAuth(`http://localhost:5001/api/influx/measurements/${bucket}`);
             const data = await response.json();
             setMeasurements(data.measurements || []); // Access the measurements array from the response
         } catch (error) {
