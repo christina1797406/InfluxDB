@@ -6,8 +6,9 @@
 - [Tech Stack](#tech-stack)
 - [Installation and Setup](#installation-and-setup)
 - [Files Included](#files-included)
+- [Troubleshooting Guide](#troubleshooting-guide)
 - [Contributors](#contributors)
-- [Acknowledgements](#Acknowledgements)
+- [Acknowledgements](#acknowledgements)
 
 ## Tool Description
 InfluxDB UI is a custom user interface application for InfluxDB with seamless integration with Grafana. This user-friendly platform simplifies interaction with real-time data for managing, quering, and visualising metrics. 
@@ -45,7 +46,11 @@ npm run start:all
 ## Files Included
 - to be added
 
+## Troubleshooting Guide
+- to be added
+
 ## Contributors
+The following contains the list of contributors who are students from the group porject InfluxDB UG-1.
 - Christina Nguyen a1797406
 - Kriti Aggarwal a1881175
 - Lakshya Patel a1885152
