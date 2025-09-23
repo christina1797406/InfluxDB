@@ -7,10 +7,11 @@ export default function Footer() {
           <p className="footer-text">Manage your data with ease.</p>
         </div>
         <div className="footer-links">
-          <a href="#">Docs</a>
-          <a href="https://github.cs.adelaide.edu.au/a1881053/INFLUX-UI-UG-1">GitHub</a>
-          <a href="#">Support</a>
-          <a href="#">Privacy</a>
+          {/* Use a real link if available, otherwise use a button */}
+          <button className="footer-link-btn" type="button" tabIndex={0}>Docs</button>
+          <a href="https://github.cs.adelaide.edu.au/a1881053/INFLUX-UI-UG-" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <button className="footer-link-btn" type="button" tabIndex={0}>Support</button>
+          <button className="footer-link-btn" type="button" tabIndex={0}>Privacy</button>
         </div>
       </div>
       <div className="footer-bottom">

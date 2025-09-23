@@ -461,6 +461,26 @@ body {
   gap: 0.6rem;
 }
 
+/* Add to index.css */
+.footer-link-btn {
+  background: none;
+  border: none;
+  color: #c7c7c7;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+.footer-link-btn:hover {
+  color: #ffffff;
+}
+body.light-mode .footer-link-btn {
+  color: #6b7280;
+}
+body.light-mode .footer-link-btn:hover {
+  color: #3182ce;
+}
+
 .footer-links a {
   text-decoration: none;
   color: #c7c7c7;
