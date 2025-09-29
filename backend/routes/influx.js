@@ -138,4 +138,27 @@ router.get('/buckets', authMiddleware, async (req, res) => {
   }
 });
 
+// Execute a flux query and return results
+router.post('/query', authMiddleware, async (req, res) => {
+  try {
+    const { query } = req.body;
+    if (!query) {
+      return res.status(400).json({ error: 'Missing query' });
+    }
+
+    const client = getClientFromUser(req.user);
+    if (!client) {
+      return res.status(400).json({ error: 'No InfluxDB client available' });
+    }
+
+    const queryApi = client.influxDB.getQueryApi(client.org);
+    const result = await queryApi.collectRows(query);
+    
+    res.json({ results: result });
+  } catch (error) {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Failed to execute query', details: error.message });
+  }
+});
+
 module.exports = router;
