@@ -63,7 +63,7 @@ INFLUX-UI-UG-1/
 - npm
 - Access to InfluxDB and Grafana instances (i.e. login credentials with InfluxDB and Grafana)
 
-Complete the following steps to install and setup the InfluxDB UI.
+### Steps
 ### 1. Clone this repository to your local machine
 ```bash
 git clone https://github.cs.adelaide.edu.au/a1881053/INFLUX-UI-UG-1.git
