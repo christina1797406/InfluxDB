@@ -92,7 +92,7 @@ npm run start:all
 - to be added
 
 ## Contributors
-This project was developed by students from the InfluxDB UG-1 group.
+This project was developed by students from the InfluxDB UG-1 group:
 - Christina Nguyen a1797406
 - Kriti Aggarwal a1881175
 - Lakshya Patel a1885152
