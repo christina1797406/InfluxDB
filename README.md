@@ -6,7 +6,7 @@
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Installation and Setup](#installation-and-setup)
-- [Directories/Files Included](#directories/files-included)
+- [Files Included](#files-included)
 - [Troubleshooting Guide](#troubleshooting-guide)
 - [Contributors](#contributors)
 - [Acknowledgements](#acknowledgements)
@@ -34,6 +34,7 @@ The goal of this project is to bridge the gap between data collection and data v
    - NPM for package and dependency management
 
 ## Project Structure
+```bash
 INFLUX-UI-UG-1/
 ├── backend/                # Backend API server
 │   ├── index.js            # Entry point for backend server
@@ -54,6 +55,7 @@ INFLUX-UI-UG-1/
 ├── package.json            # Root project configuration
 ├── package-lock.json
 └── README.md               # Project documentation
+```
 
 ## Installation and Setup
 ### Prerequisites
@@ -78,7 +80,7 @@ npm install
 npm run start:all
 ```
 
-## Directories/Files Included
+## Files Included
 - backend/ - Contains server-side logic, middleware, routes, and utilities
 - frontend/ - Contains the React UI application such as components, pages, and styling.
 - package.json - Project metadata and scripts
@@ -100,4 +102,5 @@ This project was developed by students from the InfluxDB UG-1 group.
 
 ## Acknowledgements
 Pull requests, suggestions, and bug reports are welcome. 
+
 For significant contributions, please open an issue first to discuss your ideas.
