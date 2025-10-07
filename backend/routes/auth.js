@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router()
 const jwt = require('jsonwebtoken')
-const {createInfluxClient} = require('../utils/influx.config');
+const { createInfluxClient } = require('../utils/influx.config');
 
 const ACCESS_TOKEN_EXP = "1h";
 const REFRESH_TOKEN_EXP = "7d";
@@ -33,11 +33,11 @@ function getExistingPayload(req) {
 }
 
 // LOGIN WITH INFLUXDB
-router.post('/login/influx', async(req,res)=>{
-    const {influxToken, influxUrl, influxOrg} = req.body;
+router.post('/login/influx', async (req, res) => {
+    const { influxToken, influxUrl, influxOrg } = req.body;
 
     if (!influxToken) {
-        return res.status(400).json({error: "Missing InfluxDB token!"});
+        return res.status(400).json({ error: "Missing InfluxDB token!" });
     }
 
     try {
@@ -47,7 +47,7 @@ router.post('/login/influx', async(req,res)=>{
             token: influxToken,
             org: influxOrg || process.env.INFLUX_ORG,
         });
-        await bucketsAPI.getBuckets({org});
+        await bucketsAPI.getBuckets({ org });
 
         // merge with existing payload (so later grafana login adds on top, not overwrite)
         const existing = getExistingPayload(req);
@@ -77,7 +77,7 @@ router.post('/login/influx', async(req,res)=>{
 router.post('/login/grafana', async (req, res) => {
     const { grafanaToken: rawToken, grafanaOrgId, grafanaUrl: grafUrlBody } = req.body;
 
-    if (!rawToken){
+    if (!rawToken) {
         return res.status(400).json({ error: "Missing Grafana token!" });
     }
 
@@ -153,4 +153,4 @@ router.post("/logout", (req, res) => {
     res.json({ success: true, message: "Logged out" });
 });
 
-module.exports = {router};
+module.exports = { router };

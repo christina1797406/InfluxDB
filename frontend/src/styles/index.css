@@ -911,18 +911,34 @@ body.light-mode .chart-container {
 
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(30,30,40,0.55);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(30, 30, 40, 0.55);
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.grafana-embed {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  border: 1px dashed #3182ce;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+body.dark-mode .grafana-embed {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
 .modal {
   background: #18181b;
   border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   padding: 24px 18px;
   min-width: 320px;
   max-width: 520px;
@@ -954,6 +970,7 @@ body.light-mode .modal {
   transition: color 0.2s;
   z-index: 1;
 }
+
 .modal-close:hover {
   color: #c53030;
 }
@@ -978,8 +995,8 @@ body.light-mode .modal {
 }
 
 .auth-block {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 16px;
   min-width: 0;
@@ -988,6 +1005,7 @@ body.light-mode .modal {
   flex-direction: column;
   gap: 10px;
 }
+
 body.light-mode .auth-block {
   background: #f8fafc;
   border-color: #cbd5e1;
@@ -1030,6 +1048,7 @@ body.light-mode .auth-block {
   font-size: 14px;
   transition: border 0.2s;
 }
+
 body.light-mode .form-group input {
   background: #fff;
   border: 1px solid #cbd5e1;
@@ -1062,6 +1081,7 @@ body.light-mode .form-group input {
   margin-bottom: 6px;
   transition: box-shadow 0.2s, background 0.2s;
 }
+
 .btn-auth:hover {
   box-shadow: 0 4px 16px rgba(254, 122, 0, 0.18);
   background: linear-gradient(135deg, #fe7b00 0%, #fe954f 100%);
@@ -1083,6 +1103,7 @@ body.light-mode .form-group input {
   font-size: 13px;
   padding: 0;
 }
+
 body.light-mode .link-btn {
   color: #2563eb;
 }
@@ -1093,6 +1114,7 @@ body.light-mode .link-btn {
     max-width: 320px;
     gap: 8px;
   }
+
   .modal {
     padding: 12px 4px;
     min-width: 0;
@@ -1549,6 +1571,10 @@ input:checked+.toggle-slider:hover {
 .code {
   color: #e2e8f0;
   line-height: 1.5;
+  white-space: pre-wrap;
+  /* keep newlines and wrap long lines */
+  word-break: break-word;
+  /* avoid overflow on long tokens */
 }
 
 .syntax-keyword {

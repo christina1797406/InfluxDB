@@ -23,8 +23,8 @@ router.get('/measurements/:bucket', authMiddleware, async (req, res) => {
     const bucket = req.params.bucket;
     const client = getClientFromUser(req.user);
 
-    if (!client){
-      console.error("Buckets route missing client", {client});
+    if (!client) {
+      console.error("Buckets route missing client", { client });
       return res.status(400).json({ error: "No Influx client available" });
     }
 
@@ -61,7 +61,7 @@ router.get('/measurements/:bucket', authMiddleware, async (req, res) => {
 
   } catch (error) {
     console.error('Error fetching measurements:', error);
-    res.status(500).json({ error: 'Failed to fetch measurements'});
+    res.status(500).json({ error: 'Failed to fetch measurements' });
   }
 });
 
@@ -107,7 +107,7 @@ router.get('/fields/:bucket/:measurement', authMiddleware, async (req, res) => {
     res.json([...fields, ...tags]);
   } catch (error) {
     console.error('Error fetching fields:', error);
-    res.status(500).json({ error: 'Failed to fetch fields'});
+    res.status(500).json({ error: 'Failed to fetch fields' });
   }
 });
 
@@ -120,25 +120,25 @@ router.get('/buckets', authMiddleware, async (req, res) => {
     const client = getClientFromUser(req.user);
     // const org = client.org;
 
-    if (!client){
-      console.error("Buckets route missing client", {client});
+    if (!client) {
+      console.error("Buckets route missing client", { client });
     }
 
     console.log("/buckets route hit with org", client.org);
 
     const bucketsAPI = client.bucketsAPI;
-    const response = await bucketsAPI.getBuckets({org: client.org});
+    const response = await bucketsAPI.getBuckets({ org: client.org });
     console.log("Buckets API raw response:", response);
-    const buckets = (response?.buckets || []).map(b => ({id: b.id, name: b.name,}));
+    const buckets = (response?.buckets || []).map(b => ({ id: b.id, name: b.name, }));
     res.json(buckets);
 
   } catch (error) {
     console.error('Error fetching buckets:', error);
-    res.status(500).json({ error: 'Failed to fetch buckets', details: error.message});
+    res.status(500).json({ error: 'Failed to fetch buckets', details: error.message });
   }
 });
 
-// Execute a flux query and return results
+// Execute a flux query and return results + timing
 router.post('/query', authMiddleware, async (req, res) => {
   try {
     const { query } = req.body;
@@ -152,9 +152,14 @@ router.post('/query', authMiddleware, async (req, res) => {
     }
 
     const queryApi = client.influxDB.getQueryApi(client.org);
+
+    // measure time precise, so user see real exec ms (close enough)
+    const start = process.hrtime.bigint();
     const result = await queryApi.collectRows(query);
-    
-    res.json({ results: result });
+    const end = process.hrtime.bigint();
+    const tookMs = Number(end - start) / 1e6;
+
+    res.json({ results: result, tookMs });
   } catch (error) {
     console.error('Error executing query:', error);
     res.status(500).json({ error: 'Failed to execute query', details: error.message });
