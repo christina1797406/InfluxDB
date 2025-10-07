@@ -61,7 +61,7 @@ INFLUX-UI-UG-1/
 ### Prerequisites
 - Node.js
 - npm
-- Access to InfluxDB and Grafana instances (i.e. login credentials with InfluxDB and Grafana)
+- Access to InfluxDB and Grafana instances (i.e. you will need to use your login credentials with InfluxDB and Grafana, such as your access token and organisation name)
 
 ### Steps
 1. Clone this repository to your local machine
@@ -76,7 +76,21 @@ cd INFLUX-UI-UG-1
 ```bash
 npm install
 ```
-4. Launch the application
+4. Create a .env file in `/backend/` with following content:
+- DB_USER=yourname
+- DB_HOST=localhost
+- DB_NAME=influx01
+- DB_PASSWORD=yourpassword
+- DB_PORT=5432
+- JWT_SECRET=influx-db-01
+
+- INFLUX_URL=https://us-east-1-1.aws.cloud2.influxdata.com
+- INFLUX_TOKEN=yourtoken
+- INFLUX_ORG=yourOrgName
+- GRAFANA_URL=https://yourUserName.grafana.net/
+- GRAFANA_TOKEN=yourToken
+
+5. Launch the application
 ```bash
 npm run start:all
 ```
