@@ -1122,6 +1122,35 @@ body.light-mode .link-btn {
   }
 }
 
+
+body.light-mode .modal h2 {
+  /* light theme (blue gradient like rest of ui) */
+  background: linear-gradient(135deg, #3182ce 0%, #5a67d8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+body.light-mode .btn-auth {
+  background: linear-gradient(135deg, #3182ce 0%, #5a67d8 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(49, 130, 206, 0.25);
+}
+
+body.light-mode .btn-auth:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
+  box-shadow: 0 8px 20px rgba(49, 130, 206, 0.35);
+}
+
+/* Source headings (Bucket/Measurement) */
+body.light-mode .form-group label,
+body.light-mode .form-label,
+body.light-mode .data-source-card .form-group label {
+  color: #2563eb !important;
+}
+
 .error-modal {
   background: #fff;
   color: #c53030;
