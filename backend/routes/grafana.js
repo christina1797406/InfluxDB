@@ -96,6 +96,7 @@ function buildFluxFromState(state) {
             'Last 5m': '-5m', 'Last 15m': '-15m', 'Last 30m': '-30m',
             'Last 1h': '-1h', 'Last 6h': '-6h', 'Last 12h': '-12h',
             'Last 24h': '-24h', 'Last 7d': '-7d', 'Last 30d': '-30d',
+            'Last 3 months': '-3mo',
         };
         return map[p] || '-1h';
     };

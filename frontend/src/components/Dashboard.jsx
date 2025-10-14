@@ -13,31 +13,31 @@ export default function Dashboard() {
 
   // add new dashboard
   const addDashboard = () => {
-    const newId = dashboards.length ? Math.max(...dashboards.map(d => d.id)) + 1 : 1;
-    setDashboards([...dashboards, {
-      id: newId,
-      name: `Dashboard ${newId}`,
-      grafanaPanel: null,
-      lastFlux: "",
-      lastExecMs: null
-    }]);
-    setActiveId(newId);
+    setDashboards(prev => {
+      const newId = prev.length ? Math.max(...prev.map(d => d.id)) + 1 : 1;
+      const next = [...prev, { id: newId, name: `Dashboard ${newId}`, grafanaPanel: null, lastFlux: "", lastExecMs: null }];
+      setActiveId(newId);
+      return next;
+    });
   };
 
   // remove dashboard by id
   const removeDashboard = (id) => {
-    const filtered = dashboards.filter(d => d.id !== id);
-    setDashboards(filtered);
-    if (activeId === id && filtered.length > 0) {
-      setActiveId(filtered[0].id);
-    }
+    setDashboards(prev => {
+      const filtered = prev.filter(d => d.id !== id);
+      // adjust active after removal
+      if (activeId === id && filtered.length > 0) {
+        setActiveId(filtered[0].id);
+      }
+      return filtered;
+    });
   };
 
   // update dashboard data by id
   const updateDashboard = (dashboardId, updates) => {
-    setDashboards(dashboards.map(d =>
-      d.id === dashboardId ? { ...d, ...updates } : d
-    ));
+    setDashboards(prev =>
+      prev.map(d => (d.id === dashboardId ? { ...d, ...updates } : d))
+    );
   };
 
   const active = dashboards.find(d => d.id === activeId);
