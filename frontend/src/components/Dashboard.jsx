@@ -40,6 +40,8 @@ export default function Dashboard() {
     ));
   };
 
+  const active = dashboards.find(d => d.id === activeId);
+
   return (
     <div className="container">
       <DashboardTabs
@@ -49,29 +51,26 @@ export default function Dashboard() {
         onAdd={addDashboard}
         onRemove={removeDashboard}
       />
-      {/* render all dashboards but only show the active one */}
-      {dashboards.map(dashboard => (
-        <div
-          key={dashboard.id}
-          className="main-content"
-          style={{ display: dashboard.id === activeId ? 'block' : 'none' }}
-        >
+      {active && (
+        <div className="main-content">
+          {/* Force a fresh QuerySection per dashboard so builder state resets on switch */}
           <QuerySection
-            onExportToGrafana={(panel) => updateDashboard(dashboard.id, { grafanaPanel: panel })}
+            key={active.id} // NEW
+            onExportToGrafana={(panel) => updateDashboard(active.id, { grafanaPanel: panel })}
             onQueryStats={({ flux, execMs }) => {
-              updateDashboard(dashboard.id, {
+              updateDashboard(active.id, {
                 lastFlux: flux || "",
                 lastExecMs: typeof execMs === "number" ? Math.round(execMs) : null
               });
             }}
           />
           <VisualisationSection
-            grafanaPanel={dashboard.grafanaPanel}
-            flux={dashboard.lastFlux}
-            execMs={dashboard.lastExecMs}
+            grafanaPanel={active.grafanaPanel}
+            flux={active.lastFlux}
+            execMs={active.lastExecMs}
           />
         </div>
-      ))}
+      )}
     </div>
   );
 }

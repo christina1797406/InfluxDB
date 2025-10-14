@@ -80,6 +80,7 @@ export default function QuerySection({ onExportToGrafana, onQueryStats }) {
                 'Last 5m': '-5m', 'Last 15m': '-15m', 'Last 30m': '-30m',
                 'Last 1h': '-1h', 'Last 6h': '-6h', 'Last 12h': '-12h',
                 'Last 24h': '-24h', 'Last 7d': '-7d', 'Last 30d': '-30d',
+                'Last 3 months': '-3mo',
             };
             return map[p] || '-1h';
         };
@@ -134,7 +135,6 @@ export default function QuerySection({ onExportToGrafana, onQueryStats }) {
         ].filter(Boolean).join('\n  ');
     };
 
-    // build the current state for saving or running query
     const buildState = () => ({
         bucket: selectedBucket,
         measurement: selectedMeasurement,
@@ -146,7 +146,27 @@ export default function QuerySection({ onExportToGrafana, onQueryStats }) {
         timePreset,
         timeFrom,
         timeTo,
+        // include optional fields if you want them persisted:
+        mathExpr,
+        autoRefresh,
+        refreshInterval,
+        createEmpty,
     });
+
+    // Reset builder UI (does not touch Saved Queries)
+    const handleResetBuilder = () => {
+        setSelectedFields([]);
+        setFilters([]);
+        setGroupBy([]);
+        setAggregate("mean");
+        setWindowEvery("1m");
+        setCreateEmpty(false);
+        setMathExpr("");
+        setAutoRefresh(false);
+        setRefreshInterval("30s");
+        // keep time preset and datasource as-is, unless you prefer to reset:
+        // setSelectedBucket(""); setSelectedMeasurement(""); setTimePreset("Last 15m");
+    };
 
     // handler to run query and export to Grafana, also measure exec time via backend
     const handleRunQuery = async () => {
@@ -203,6 +223,51 @@ export default function QuerySection({ onExportToGrafana, onQueryStats }) {
         }
     };
 
+    // Save current builder state into Saved Queries
+    const handleSaveQuery = () => {
+        const builderState = buildState();
+        if (!builderState.bucket || !builderState.measurement) {
+            alert("Select a bucket and measurement first.");
+            return;
+        }
+        const defaultName = `${builderState.measurement} – ${builderState.fields.filter(f => f.type === 'FIELD').map(f => f.name).join(', ') || 'query'}`;
+        const name = window.prompt("Query name:", defaultName) || "";
+        if (!name.trim()) return;
+
+        // choose or create folder by name
+        const folderName = window.prompt("Folder name (existing or new):", "Saved") || "Saved";
+
+        // compute flux snapshot for convenience
+        const flux = buildFluxFromState(builderState);
+
+        // notify SavedQueries to persist (decouple via event to keep components simple)
+        window.dispatchEvent(new CustomEvent("savedQueries:add", {
+            detail: {
+                folderName,
+                query: { name: name.trim(), builderState, flux }
+            }
+        }));
+    };
+
+    // Load a saved query back into the UI
+    const handleLoadSaved = (saved) => {
+        const st = saved?.builderState || {};
+        setSelectedBucket(st.bucket || "");
+        setSelectedMeasurement(st.measurement || "");
+        setSelectedFields(st.fields || []);
+        setFilters(st.filters || []);
+        setGroupBy(st.groupBy || []);
+        setAggregate(st.aggregate || "mean");
+        setWindowEvery(st.windowEvery || "1m");
+        setMathExpr(st.mathExpr || "");
+        setAutoRefresh(st.autoRefresh || false);
+        setRefreshInterval(st.refreshInterval || "30s");
+        setTimePreset(st.timePreset || "Last 15m");
+        setTimeFrom(st.timeFrom || "");
+        setTimeTo(st.timeTo || "");
+        // Keep timezone as-is
+    };
+
     // render
     return (
         <div className="query-section">
@@ -245,10 +310,12 @@ export default function QuerySection({ onExportToGrafana, onQueryStats }) {
                 onChangeAutoRefresh={setAutoRefresh}
                 refreshInterval={refreshInterval}
                 onChangeRefreshInterval={setRefreshInterval}
-                onRunQuery={handleRunQuery} // added
+                onRunQuery={handleRunQuery}
+                onSaveQuery={handleSaveQuery}
+                onResetQuery={handleResetBuilder}
             />
 
-            <SavedQueries />
+            <SavedQueries onLoadQuery={handleLoadSaved} />
         </div>
     );
 }

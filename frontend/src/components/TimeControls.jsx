@@ -8,22 +8,26 @@ export default function TimeControls({
     timezone, onChangeTimezone
 }) {
     return (
-        <div className="card">
-            <div className="card-title">Time Controls</div>
-
+        <div className="card time-controls">
+            <div className="card-title">Time</div>
             <div className="form-group">
                 <label className="form-label">Preset</label>
-                <select value={timePreset} onChange={(e) => onChangeTimePreset(e.target.value)}>
-                    <option>Last 5m</option>
-                    <option>Last 15m</option>
-                    <option>Last 30m</option>
-                    <option>Last 1h</option>
-                    <option>Last 6h</option>
-                    <option>Last 12h</option>
-                    <option>Last 24h</option>
-                    <option>Last 7d</option>
-                    <option>Last 30d</option>
-                    <option>Custom</option>
+                <select
+                    className="form-control"
+                    value={timePreset}
+                    onChange={(e) => onChangeTimePreset(e.target.value)}
+                >
+                    <option value="Last 5m">Last 5m</option>
+                    <option value="Last 15m">Last 15m</option>
+                    <option value="Last 30m">Last 30m</option>
+                    <option value="Last 1h">Last 1h</option>
+                    <option value="Last 6h">Last 6h</option>
+                    <option value="Last 12h">Last 12h</option>
+                    <option value="Last 24h">Last 24h</option>
+                    <option value="Last 7d">Last 7d</option>
+                    <option value="Last 30d">Last 30d</option>
+                    <option value="Last 3 months">Last 3 months</option>
+                    <option value="Custom">Custom</option>
                 </select>
             </div>
 
@@ -49,7 +53,6 @@ export default function TimeControls({
                     </div>
                 </div>
             )}
-            {/*  might delete later - added it for scalability if required */}
             <div className="form-group">
                 <label className="form-label">Timezone</label>
                 <select value={timezone} onChange={(e) => onChangeTimezone(e.target.value)}>

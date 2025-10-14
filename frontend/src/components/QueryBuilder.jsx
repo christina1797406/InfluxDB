@@ -6,7 +6,8 @@ export default function QueryBuilder({
     windowEvery, onChangeWindowEvery, createEmpty, onChangeCreateEmpty,
     mathExpr, onChangeMathExpr,
     autoRefresh, onChangeAutoRefresh, refreshInterval, onChangeRefreshInterval,
-    onRunQuery // still only working on the Grafana external browser
+    onRunQuery,    onSaveQuery,
+    onResetQuery  
 }) {
     // handle drop event (selected fields)
     const handleDrop = (e) => {
@@ -33,7 +34,7 @@ export default function QueryBuilder({
     };
 
     return (
-        <div className="card">
+        <div className="card query-builder-card">
             <div className="card-title">Query Builder</div>
 
             {/* Selected fields */}
@@ -220,10 +221,10 @@ export default function QueryBuilder({
                 </select>
             </div>
 
-            <div className="btn-group">
+            <div className="btn-group action-buttons">
                 <button className="btn btn-primary" onClick={onRunQuery}>Run Query</button>
-                <button className="btn btn-secondary">Reset</button>
-                <button className="btn btn-secondary">Save Query</button>
+                <button className="btn btn-secondary" onClick={onResetQuery}>Reset</button>
+                <button className="btn btn-secondary" onClick={onSaveQuery}>Save Query</button>
             </div>
         </div>
     );
