@@ -1,12 +1,12 @@
 // imports
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DataSource from "./DataSource";
 import FieldSelector from "./FieldSelector";
 import QueryBuilder from "./QueryBuilder";
 import SavedQueries from "./SavedQueries";
 import TimeControls from "./TimeControls";
 
-export default function QuerySection({ onExportToGrafana, onQueryStats }) {
+export default function QuerySection({ dashboardId, onExportToGrafana, onQueryStats }) {
     // variables for selected bucket and measurement
     const [selectedBucket, setSelectedBucket] = useState("");
     const [selectedMeasurement, setSelectedMeasurement] = useState("");
@@ -27,6 +27,68 @@ export default function QuerySection({ onExportToGrafana, onQueryStats }) {
     const [timeFrom, setTimeFrom] = useState("");
     const [timeTo, setTimeTo] = useState("");
     const [timezone, setTimezone] = useState("local");
+
+    // key for per-dashboard temp storage
+    const storeKey = `qs:dash:${dashboardId || "default"}`;
+
+    // hydrate from sessionStorage on mount / dashboard switch
+    useEffect(() => {
+        try {
+            const raw = sessionStorage.getItem(storeKey);
+            if (!raw) return;
+            const st = JSON.parse(raw);
+            setSelectedBucket(st.bucket || "");
+            setSelectedMeasurement(st.measurement || "");
+            setSelectedFields(st.fields || []);
+            setFilters(st.filters || []);
+            setGroupBy(st.groupBy || []);
+            setAggregate(st.aggregate || "mean");
+            setWindowEvery(st.windowEvery || "1m");
+            setCreateEmpty(!!st.createEmpty);
+            setMathExpr(st.mathExpr || "");
+            setAutoRefresh(!!st.autoRefresh);
+            setRefreshInterval(st.refreshInterval || "30s");
+            setTimePreset(st.timePreset || "Last 15m");
+            setTimeFrom(st.timeFrom || "");
+            setTimeTo(st.timeTo || "");
+            // timezone intentionally left as-is unless stored
+            if (st.timezone) setTimezone(st.timezone);
+        } catch {}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [storeKey]);
+
+    const buildState = () => ({
+        bucket: selectedBucket,
+        measurement: selectedMeasurement,
+        fields: selectedFields,
+        filters,
+        groupBy,
+        aggregate,
+        windowEvery,
+        timePreset,
+        timeFrom,
+        timeTo,
+        // include optional fields:
+        mathExpr,
+        autoRefresh,
+        refreshInterval,
+        createEmpty,
+        timezone,
+    });
+
+    // persist builder state per dashboard whenever it changes
+    useEffect(() => {
+        try {
+            sessionStorage.setItem(storeKey, JSON.stringify(buildState()));
+        } catch {}
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        storeKey,
+        selectedBucket, selectedMeasurement, selectedFields,
+        filters, groupBy, aggregate, windowEvery, createEmpty,
+        mathExpr, autoRefresh, refreshInterval,
+        timePreset, timeFrom, timeTo, timezone
+    ]);
 
     // handler to add a field/tag if not already present
     const handleFieldDrop = (field) => {
@@ -135,24 +197,6 @@ export default function QuerySection({ onExportToGrafana, onQueryStats }) {
         ].filter(Boolean).join('\n  ');
     };
 
-    const buildState = () => ({
-        bucket: selectedBucket,
-        measurement: selectedMeasurement,
-        fields: selectedFields,
-        filters,
-        groupBy,
-        aggregate,
-        windowEvery,
-        timePreset,
-        timeFrom,
-        timeTo,
-        // include optional fields if you want them persisted:
-        mathExpr,
-        autoRefresh,
-        refreshInterval,
-        createEmpty,
-    });
-
     // Reset builder UI (does not touch Saved Queries)
     const handleResetBuilder = () => {
         setSelectedFields([]);
@@ -175,7 +219,8 @@ export default function QuerySection({ onExportToGrafana, onQueryStats }) {
             alert("Select a bucket and measurement first.");
             return;
         }
-        localStorage.setItem("queryState", JSON.stringify(builderState));
+        // Persist snapshot for this tab (already auto-saved, but keep explicit)
+        try { sessionStorage.setItem(storeKey, JSON.stringify(builderState)); } catch {}
 
         try {
             // 1) create grafana panel (embed url)
@@ -265,14 +310,19 @@ export default function QuerySection({ onExportToGrafana, onQueryStats }) {
         setTimePreset(st.timePreset || "Last 15m");
         setTimeFrom(st.timeFrom || "");
         setTimeTo(st.timeTo || "");
-        // Keep timezone as-is
+        if (st.timezone) setTimezone(st.timezone);
     };
 
     // render
     return (
         <div className="query-section">
             <div className="left-stack">
-                <DataSource onBucketSelect={setSelectedBucket} onMeasurementSelect={setSelectedMeasurement} />
+                <DataSource
+                    selectedBucket={selectedBucket}
+                    selectedMeasurement={selectedMeasurement}
+                    onBucketSelect={setSelectedBucket}
+                    onMeasurementSelect={setSelectedMeasurement}
+                />
                 <TimeControls
                     timePreset={timePreset} onChangeTimePreset={setTimePreset}
                     timeFrom={timeFrom} onChangeTimeFrom={setTimeFrom}

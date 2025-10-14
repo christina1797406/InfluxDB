@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchWithAuth } from "../utils/fetchWithAuth";
 
-export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
+export default function DataSource({ onBucketSelect, onMeasurementSelect, selectedBucket: propBucket, selectedMeasurement: propMeasurement }) {
     // variables for buckets, measurements, selected values, and error handling
     const [buckets, setBuckets] = useState([]);
     const [measurements, setMeasurements] = useState([]);
@@ -9,15 +9,26 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
     const [selectedMeasurement, setSelectedMeasurement] = useState("");
     const [error, setError] = useState(null);
 
+    // sync from props (so loading a saved query shows in the UI and triggers fetches)
+    useEffect(() => {
+        if (propBucket !== undefined) setSelectedBucket(propBucket || "");
+    }, [propBucket]);
+    useEffect(() => {
+        if (propMeasurement !== undefined) setSelectedMeasurement(propMeasurement || "");
+    }, [propMeasurement]);
+
     // Fetch buckets on component mount
     useEffect(() => {
         fetchBuckets();
     }, []);
 
-    // Fetch measurements when selectedBucket changes - fixed
+    // Fetch measurements when selectedBucket changes
     useEffect(() => {
         if (selectedBucket) {
             fetchMeasurements(selectedBucket);
+        } else {
+            setMeasurements([]);
+            setSelectedMeasurement("");
         }
     }, [selectedBucket]);
 
@@ -35,12 +46,12 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
         }
     };
 
-    // Fixed: its a function to fetch the measurements based on selected bucket
+    // fetch the measurements based on selected bucket
     const fetchMeasurements = async (bucket) => {
         try {
             const response = await fetchWithAuth(`http://localhost:5001/api/influx/measurements/${bucket}`);
             const data = await response.json();
-            setMeasurements(data.measurements || []); // Access the measurements array from the response
+            setMeasurements(data.measurements || []);
         } catch (error) {
             console.error("Error fetching measurements:", error);
             setError("Failed to fetch measurements");
@@ -61,8 +72,9 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
                 <select
                     value={selectedBucket}
                     onChange={(e) => {
-                        setSelectedBucket(e.target.value);
-                        onBucketSelect(e.target.value);
+                        const val = e.target.value;
+                        setSelectedBucket(val);
+                        onBucketSelect && onBucketSelect(val);
                         setSelectedMeasurement(""); // Reset measurement when bucket changes
                     }}
                 >
@@ -79,8 +91,9 @@ export default function DataSource({ onBucketSelect, onMeasurementSelect }) {
                 <select
                     value={selectedMeasurement}
                     onChange={(e) => {
-                        setSelectedMeasurement(e.target.value);
-                        onMeasurementSelect(e.target.value);
+                        const val = e.target.value;
+                        setSelectedMeasurement(val);
+                        onMeasurementSelect && onMeasurementSelect(val);
                     }}
                     disabled={!selectedBucket}
                 >

@@ -1,15 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardTabs from "./DashboardTabs";
 import QuerySection from "./QuerySection";
 import VisualisationSection from "./VisualisationSection";
 
+const DASH_STORAGE = "ui:dashboards:v1";
+const ACTIVE_KEY = "ui:dashboards:activeId";
+
 export default function Dashboard() {
-  const [dashboards, setDashboards] = useState([
+  // default 3 dashboards (only used if nothing persisted)
+  const defaultDashboards = [
     { id: 1, name: "Dashboard 1", grafanaPanel: null, lastFlux: "", lastExecMs: null },
     { id: 2, name: "Dashboard 2", grafanaPanel: null, lastFlux: "", lastExecMs: null },
     { id: 3, name: "Dashboard 3", grafanaPanel: null, lastFlux: "", lastExecMs: null },
-  ]);
-  const [activeId, setActiveId] = useState(1);
+  ];
+
+  const [dashboards, setDashboards] = useState(() => {
+    try {
+      const raw = localStorage.getItem(DASH_STORAGE);
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return defaultDashboards;
+  });
+
+  const [activeId, setActiveId] = useState(() => {
+    const raw = localStorage.getItem(ACTIVE_KEY);
+    const parsed = raw ? parseInt(raw, 10) : 1;
+    return Number.isFinite(parsed) ? parsed : 1;
+  });
+
+  // keep dashboards persisted
+  useEffect(() => {
+    localStorage.setItem(DASH_STORAGE, JSON.stringify(dashboards));
+    // ensure activeId always points to an existing dashboard
+    if (!dashboards.some(d => d.id === activeId) && dashboards.length > 0) {
+      setActiveId(dashboards[0].id);
+    }
+  }, [dashboards, activeId]);
+
+  // persist active tab
+  useEffect(() => {
+    localStorage.setItem(ACTIVE_KEY, String(activeId));
+  }, [activeId]);
 
   // add new dashboard
   const addDashboard = () => {
@@ -21,10 +52,12 @@ export default function Dashboard() {
     });
   };
 
-  // remove dashboard by id
+  // remove dashboard by id (+ clear its temp builder state)
   const removeDashboard = (id) => {
     setDashboards(prev => {
       const filtered = prev.filter(d => d.id !== id);
+      // clear per-tab temp state
+      try { sessionStorage.removeItem(`qs:dash:${id}`); } catch {}
       // adjust active after removal
       if (activeId === id && filtered.length > 0) {
         setActiveId(filtered[0].id);
@@ -53,9 +86,11 @@ export default function Dashboard() {
       />
       {active && (
         <div className="main-content">
-          {/* Force a fresh QuerySection per dashboard so builder state resets on switch */}
+          {/* Force a fresh QuerySection per dashboard so builder state resets on switch,
+              but QuerySection will rehydrate from sessionStorage for this dashboard id */}
           <QuerySection
-            key={active.id} // NEW
+            key={active.id}
+            dashboardId={active.id}
             onExportToGrafana={(panel) => updateDashboard(active.id, { grafanaPanel: panel })}
             onQueryStats={({ flux, execMs }) => {
               updateDashboard(active.id, {
