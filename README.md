@@ -20,8 +20,8 @@ The goal of this project is to bridge the gap between data collection and data v
 
 ## Features
 - Seamless Grafana Integration for visualisation 
-- Support for multiple dashbaord tabs
-- Light/Dark mode toggle for better accessibility
+- Support for multiple dashboard tabs
+- Light/Dark mode toggle for better user experience
 - Secure authentication and authorization
 - Clean, modern, and user-friendly UI
 
