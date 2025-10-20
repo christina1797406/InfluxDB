@@ -1,4 +1,4 @@
-export default function ChartControls({ chartType, setChartType }) {
+export default function ChartControls({ chartType, setChartType, onSave }) {
     return (
         <div className="chart-controls">
             <div className="chart-type-selector">
@@ -19,7 +19,7 @@ export default function ChartControls({ chartType, setChartType }) {
             </div>
             <div className="chart-options">
                 <button className="btn btn-secondary">Chart Options</button>
-                <button className="btn btn-secondary">Save Dashboard</button>
+                <button className="btn btn-secondary" onClick={onSave}>Save Dashboard</button>
             </div>
         </div>
     );

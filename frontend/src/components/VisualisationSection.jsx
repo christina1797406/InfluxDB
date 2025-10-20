@@ -4,7 +4,7 @@ import ChartControls from "./ChartControls";
 import FluxCodePanel from "./FluxCodePanel";
 
 // main visualisation section with chart controls, container, and flux code panel
-export default function VisualizationSection({ grafanaPanel, flux, execMs }) {
+export default function VisualizationSection({ grafanaPanel, flux, execMs, onSaveDashboard }) {
     const [chartType, setChartType] = useState("line");
     const [showFlux, setShowFlux] = useState(false);
 
@@ -13,7 +13,7 @@ export default function VisualizationSection({ grafanaPanel, flux, execMs }) {
         <div className="visualization-section">
             <div className="card visualization-panel">
                 {/* Removed tabs; only chart view remains */}
-                <ChartControls chartType={chartType} setChartType={setChartType} />
+                <ChartControls chartType={chartType} setChartType={setChartType} onSave={onSaveDashboard} />
                 <ChartContainer chartType={chartType} grafanaPanel={grafanaPanel} />
                 <FluxCodePanel showFlux={showFlux} setShowFlux={setShowFlux} flux={flux} execMs={execMs} />
 

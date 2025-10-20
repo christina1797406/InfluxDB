@@ -9,15 +9,19 @@ const ACTIVE_KEY = "ui:dashboards:activeId";
 export default function Dashboard() {
   // default 3 dashboards (only used if nothing persisted)
   const defaultDashboards = [
-    { id: 1, name: "Dashboard 1", grafanaPanel: null, lastFlux: "", lastExecMs: null },
-    { id: 2, name: "Dashboard 2", grafanaPanel: null, lastFlux: "", lastExecMs: null },
-    { id: 3, name: "Dashboard 3", grafanaPanel: null, lastFlux: "", lastExecMs: null },
+    { id: 1, name: "Dashboard 1", grafanaPanel: null, lastFlux: "", lastExecMs: null, lastBuilderState: null },
+    { id: 2, name: "Dashboard 2", grafanaPanel: null, lastFlux: "", lastExecMs: null, lastBuilderState: null },
+    { id: 3, name: "Dashboard 3", grafanaPanel: null, lastFlux: "", lastExecMs: null, lastBuilderState: null },
   ];
 
   const [dashboards, setDashboards] = useState(() => {
     try {
       const raw = localStorage.getItem(DASH_STORAGE);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        // Drop any persisted grafanaPanel so a broken/old UID doesn't mount an overlaying iframe
+        return (Array.isArray(saved) ? saved : defaultDashboards).map(d => ({ ...d, grafanaPanel: null }));
+      }
     } catch {}
     return defaultDashboards;
   });
@@ -46,7 +50,7 @@ export default function Dashboard() {
   const addDashboard = () => {
     setDashboards(prev => {
       const newId = prev.length ? Math.max(...prev.map(d => d.id)) + 1 : 1;
-      const next = [...prev, { id: newId, name: `Dashboard ${newId}`, grafanaPanel: null, lastFlux: "", lastExecMs: null }];
+      const next = [...prev, { id: newId, name: `Dashboard ${newId}`, grafanaPanel: null, lastFlux: "", lastExecMs: null, lastBuilderState: null }];
       setActiveId(newId);
       return next;
     });
@@ -92,10 +96,11 @@ export default function Dashboard() {
             key={active.id}
             dashboardId={active.id}
             onExportToGrafana={(panel) => updateDashboard(active.id, { grafanaPanel: panel })}
-            onQueryStats={({ flux, execMs }) => {
+            onQueryStats={({ flux, execMs, builderState }) => {
               updateDashboard(active.id, {
                 lastFlux: flux || "",
-                lastExecMs: typeof execMs === "number" ? Math.round(execMs) : null
+                lastExecMs: typeof execMs === "number" ? Math.round(execMs) : null,
+                lastBuilderState: builderState || null
               });
             }}
           />
@@ -103,6 +108,44 @@ export default function Dashboard() {
             grafanaPanel={active.grafanaPanel}
             flux={active.lastFlux}
             execMs={active.lastExecMs}
+            onSaveDashboard={async () => {
+              try {
+                const title = window.prompt("Dashboard title:", active.name || "New Dashboard") || "";
+                if (!title.trim()) return;
+
+                const body = {
+                  title: title.trim(),
+                  builderState: active.lastBuilderState || undefined,
+                  flux: active.lastFlux || undefined
+                };
+
+                const res = await fetch("http://localhost:5001/api/grafana/dashboards/save", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${sessionStorage.getItem("accessToken") || ""}`,
+                  },
+                  body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                  alert(data.error || "Failed to save dashboard");
+                  return;
+                }
+                updateDashboard(active.id, {
+                  grafanaPanel: {
+                    url: data.url,
+                    uid: data.uid,
+                    panelUrl: data.panelUrl,
+                    panelImageUrl: data.panelImageUrl
+                  }
+                });
+                alert("Dashboard saved.");
+              } catch (e) {
+                console.error(e);
+                alert("Save failed. See console.");
+              }
+            }}
           />
         </div>
       )}

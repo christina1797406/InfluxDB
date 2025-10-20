@@ -180,6 +180,13 @@ function buildFluxFromState(state) {
     return lines.join('\n  ');
 }
 
+// helper: deterministic "scratch" uid per user/org so we overwrite, not create every time
+function makeScratchUid(user = {}) {
+  const seed = `${user.grafanaUrl || ''}|${user.grafanaOrgId || ''}|${user.influxOrg || ''}`;
+  let h = crypto.createHash('sha1').update(seed).digest('base64').replace(/[+/=]/g, '').slice(0, 20);
+  return `influx_ui_scratch_${h}`; // <= 40 chars, letters/numbers/underscore
+}
+
 // Ensure a Grafana InfluxDB v2 data source for the current user (uses req.user.*)
 router.post('/datasource/ensure', auth, async (req, res) => {
     try {
@@ -264,7 +271,7 @@ router.post('/datasource/ensure', auth, async (req, res) => {
     }
 });
 
-// Create/update dashboard
+// Create/update dashboard (SCRATCH - reused on every run)
 router.post('/dashboards/export', auth, async (req, res) => {
     try {
         const grafanaUrl = (req.user?.grafanaUrl || process.env.GRAFANA_URL || "").trim().replace(/\/+$/, "");
@@ -283,15 +290,91 @@ router.post('/dashboards/export', auth, async (req, res) => {
         const ds = ensureJson.datasource;
         const dsUid = ds?.uid || ds?.datasource?.uid;
 
-        // Build Flux
+        // use a deterministic scratch uid so we overwrite the same dashboard
+        const scratchUid = makeScratchUid(req.user);
+
+        // Build Flux from current builderState (or provided flux)
         const flux = req.body.flux || buildFluxFromState(req.body.builderState || {});
-        const title = req.body.title || `Influx ${influxOrg} Dashboard`;
+        const title = `Influx UI Scratch (${influxOrg || 'org'})`;
         const panelTitle = req.body.panelTitle || 'Influx Panel';
         const panelId = 1;
 
         const dashboard = {
             title,
-            uid: undefined,
+            uid: scratchUid, // scratch
+            tags: ['influx-ui-scratch'],
+            timezone: 'browser',
+            time: { from: 'now-1h', to: 'now' },
+            panels: [
+                {
+                    id: panelId,
+                    title: panelTitle,
+                    type: 'timeseries',
+                    gridPos: { x: 0, y: 0, w: 24, h: 8 },
+                    datasource: { type: 'influxdb', uid: dsUid },
+                    targets: [{ refId: 'A', query: flux, queryType: 'flux', datasource: { type: 'influxdb', uid: dsUid } }],
+                    options: { legend: { displayMode: 'list', placement: 'bottom' } },
+                    fieldConfig: { defaults: {}, overrides: [] },
+                },
+            ],
+        };
+
+        // overwrite the scratch dashboard, place it in General (folderId 0)
+        const resp = await fetch(`${grafanaUrl}/api/dashboards/db`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${grafanaToken}` },
+            body: JSON.stringify({ dashboard, folderId: 0, overwrite: true }),
+        });
+
+        const out = await resp.json().catch(() => ({}));
+        if (!resp.ok) return res.status(502).json({ error: 'Failed to update scratch dashboard', details: out });
+
+        const uid = scratchUid;
+        const orgId = req.user?.grafanaOrgId || '1';
+        const panelUrl = `${grafanaUrl}/d-solo/${uid}?orgId=${orgId}&panelId=${panelId}&kiosk&theme=dark&refresh=10s`;
+        const panelImageUrl = `${grafanaUrl}/render/d-solo/${uid}?orgId=${orgId}&panelId=${panelId}&theme=dark&width=1100&height=500`;
+
+        res.json({
+            ok: true,
+            url: out?.url ? `${grafanaUrl}${out.url}` : `${grafanaUrl}/d/${uid}`,
+            uid,
+            panelUrl,
+            panelImageUrl,
+        });
+    } catch (e) {
+        console.error('export dashboard error', e);
+        res.status(500).json({ error: 'Export failed', details: e.message });
+    }
+});
+
+// SAVE: create a real (non-scratch) dashboard on demand
+router.post('/dashboards/save', auth, async (req, res) => {
+    try {
+        const grafanaUrl = (req.user?.grafanaUrl || process.env.GRAFANA_URL || "").trim().replace(/\/+$/, "");
+        if (!grafanaUrl) return res.status(500).json({ error: 'Missing GRAFANA_URL' });
+        const { grafanaToken, influxOrg } = req.user || {};
+        if (!grafanaToken) return res.status(401).json({ error: 'Not logged in with Grafana' });
+
+        // ensure datasource first
+        const ensureRes = await fetch(`${req.protocol}://${req.get('host')}/api/grafana/datasource/ensure`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: req.headers.authorization || '' },
+            body: JSON.stringify({ defaultBucket: req.body?.builderState?.bucket }),
+        });
+        const ensureJson = await ensureRes.json();
+        if (!ensureRes.ok) return res.status(ensureRes.status).json(ensureJson);
+        const ds = ensureJson.datasource;
+        const dsUid = ds?.uid || ds?.datasource?.uid;
+
+        const flux = req.body.flux || buildFluxFromState(req.body.builderState || {});
+        const title = (req.body.title || '').trim() || `Influx Dashboard (${influxOrg || 'org'})`;
+        const panelTitle = req.body.panelTitle || 'Influx Panel';
+        const folderId = Number.isFinite(+req.body.folderId) ? +req.body.folderId : 0; // General
+        const panelId = 1;
+
+        const dashboard = {
+            title,
+            uid: undefined, // let Grafana assign a new uid
             timezone: 'browser',
             time: { from: 'now-1h', to: 'now' },
             panels: [
@@ -311,30 +394,27 @@ router.post('/dashboards/export', auth, async (req, res) => {
         const resp = await fetch(`${grafanaUrl}/api/dashboards/db`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${grafanaToken}` },
-            body: JSON.stringify({ dashboard, folderId: req.body.folderId || 0, overwrite: true }),
+            body: JSON.stringify({ dashboard, folderId, overwrite: false }),
         });
 
         const out = await resp.json().catch(() => ({}));
-        if (!resp.ok) return res.status(502).json({ error: 'Failed to create dashboard', details: out });
+        if (!resp.ok) return res.status(502).json({ error: 'Failed to save dashboard', details: out });
 
         const uid = out?.uid || out?.dashboard?.uid;
         const orgId = req.user?.grafanaOrgId || '1';
-        // note: add refresh so panel auto-updates. 'kiosk' keeps ui minimal
-        const panelUrl = uid
-            ? `${grafanaUrl}/d-solo/${uid}?orgId=${orgId}&panelId=${panelId}&kiosk&theme=dark&refresh=10s`
-            : undefined;
-        const panelImageUrl = uid ? `${grafanaUrl}/render/d-solo/${uid}?orgId=${orgId}&panelId=${panelId}&theme=dark&width=1100&height=500` : undefined;
+        const panelUrl = `${grafanaUrl}/d-solo/${uid}?orgId=${orgId}&panelId=${panelId}&kiosk&theme=dark&refresh=10s`;
+        const panelImageUrl = `${grafanaUrl}/render/d-solo/${uid}?orgId=${orgId}&panelId=${panelId}&theme=dark&width=1100&height=500`;
 
         res.json({
             ok: true,
-            url: out?.url ? `${grafanaUrl}${out.url}` : undefined,
+            url: out?.url ? `${grafanaUrl}${out.url}` : `${grafanaUrl}/d/${uid}`,
             uid,
             panelUrl,
             panelImageUrl,
         });
     } catch (e) {
-        console.error('export dashboard error', e);
-        res.status(500).json({ error: 'Export failed', details: e.message });
+        console.error('save dashboard error', e);
+        res.status(500).json({ error: 'Save failed', details: e.message });
     }
 });
 

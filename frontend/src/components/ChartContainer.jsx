@@ -60,23 +60,29 @@ export default function ChartContainer({ chartType, grafanaPanel }) {
     return (
         <div className="chart-container">
             {grafanaPanel?.panelUrl ? (
-                <div className="grafana-embed">
-                    {/* try iframe first (interactive). if blocked -> show server proxied image. note: allow_embedding not required for image */}
+                <div
+                    className="grafana-embed"
+                    // Constrain the embed so it cannot overlay other UI
+                    style={{ position: "relative", height: 520, maxWidth: "100%", overflow: "hidden" }}
+                >
+                    {/* try iframe first (interactive). if blocked -> show server proxied image */}
                     {!iframeError ? (
                         <iframe
                             key={iframeKey}
                             title="Grafana Panel"
                             src={grafanaPanel.panelUrl}
-                            width="100%"
-                            height="100%"
+                            // Fill only this box
+                            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: 0 }}
                             frameBorder="0"
                             onError={() => setIframeError(true)}
+                            // Optional: allow scripts/popups used by Grafana
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                         />
                     ) : (
                         <img
                             alt="grafana panel render"
                             src={renderUrl}
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
                         />
                     )}
                 </div>

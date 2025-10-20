@@ -291,7 +291,7 @@ export default function QuerySection({ dashboardId, onExportToGrafana, onQuerySt
             } catch {
                 // ignore timing errors, not fatal
             }
-            onQueryStats && onQueryStats({ flux, execMs });
+            onQueryStats && onQueryStats({ flux, execMs, builderState });
         } catch (e) {
             console.error(e);
             alert("Failed to contact Grafana. Check backend logs.");
