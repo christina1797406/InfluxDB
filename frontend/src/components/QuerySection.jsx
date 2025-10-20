@@ -53,7 +53,7 @@ export default function QuerySection({ dashboardId, onExportToGrafana, onQuerySt
             setTimeTo(st.timeTo || "");
             // timezone intentionally left as-is unless stored
             if (st.timezone) setTimezone(st.timezone);
-        } catch {}
+        } catch { }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [storeKey]);
 
@@ -80,7 +80,7 @@ export default function QuerySection({ dashboardId, onExportToGrafana, onQuerySt
     useEffect(() => {
         try {
             sessionStorage.setItem(storeKey, JSON.stringify(buildState()));
-        } catch {}
+        } catch { }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         storeKey,
@@ -250,7 +250,7 @@ export default function QuerySection({ dashboardId, onExportToGrafana, onQuerySt
             return;
         }
         // Persist snapshot for this tab (already auto-saved, but keep explicit)
-        try { sessionStorage.setItem(storeKey, JSON.stringify(builderState)); } catch {}
+        try { sessionStorage.setItem(storeKey, JSON.stringify(builderState)); } catch { }
 
         try {
             // 1) create grafana panel (embed url)

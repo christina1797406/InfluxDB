@@ -22,7 +22,7 @@ export default function Dashboard() {
         // Drop any persisted grafanaPanel so a broken/old UID doesn't mount an overlaying iframe
         return (Array.isArray(saved) ? saved : defaultDashboards).map(d => ({ ...d, grafanaPanel: null }));
       }
-    } catch {}
+    } catch { }
     return defaultDashboards;
   });
 
@@ -61,7 +61,7 @@ export default function Dashboard() {
     setDashboards(prev => {
       const filtered = prev.filter(d => d.id !== id);
       // clear per-tab temp state
-      try { sessionStorage.removeItem(`qs:dash:${id}`); } catch {}
+      try { sessionStorage.removeItem(`qs:dash:${id}`); } catch { }
       // adjust active after removal
       if (activeId === id && filtered.length > 0) {
         setActiveId(filtered[0].id);

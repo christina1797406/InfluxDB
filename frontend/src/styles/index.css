@@ -1665,26 +1665,31 @@ input:checked+.toggle-slider:hover {
 
 /* Make the Saved Queries card grow and its list scroll */
 .query-column .saved-queries {
-  flex: 1 1 auto;           /* take remaining height in the column */
-  min-height: 360px;        /* taller default */
+  flex: 1 1 auto;
+  /* take remaining height in the column */
+  min-height: 360px;
+  /* taller default */
 }
 
 .saved-queries {
   display: flex;
   flex-direction: column;
-  min-height: 360px;        /* ensure card itself is taller */
+  min-height: 360px;
+  /* ensure card itself is taller */
 }
 
 .saved-queries .folder-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  flex: 1 1 auto;           /* fill card */
-  overflow: auto;           /* scroll list inside card */
+  flex: 1 1 auto;
+  /* fill card */
+  overflow: auto;
+  /* scroll list inside card */
 }
 
 /* Existing rules (adjusted) */
-.saved-queries .folder-item + .folder-item {
+.saved-queries .folder-item+.folder-item {
   margin-top: 8px;
 }
 
@@ -1717,19 +1722,23 @@ input:checked+.toggle-slider:hover {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 6px 10px;        /* slightly larger for readability */
+  padding: 6px 10px;
+  /* slightly larger for readability */
   border-radius: 6px;
   box-sizing: border-box;
-  flex-wrap: wrap;          /* key: allow wrapping */
+  flex-wrap: wrap;
+  /* key: allow wrapping */
 }
 
 .saved-queries .sub-folder-item:hover {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .saved-queries .query-name {
-  flex: 1 1 60%;            /* give name most of the width */
-  min-width: 160px;         /* ensure name area */
+  flex: 1 1 60%;
+  /* give name most of the width */
+  min-width: 160px;
+  /* ensure name area */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1740,12 +1749,14 @@ input:checked+.toggle-slider:hover {
   flex: 0 1 auto;
   display: inline-flex;
   gap: 6px;
-  flex-wrap: wrap;          /* allow wrapping */
+  flex-wrap: wrap;
+  /* allow wrapping */
 }
 
 .saved-queries .query-action-btn {
   font-size: 12px;
-  padding: 2px 6px;         /* slightly tighter */
+  padding: 2px 6px;
+  /* slightly tighter */
   line-height: 1.6;
   white-space: nowrap;
 }

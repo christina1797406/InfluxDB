@@ -10,7 +10,7 @@ export default function QueryBuilder({
     autoRefresh, onChangeAutoRefresh, refreshInterval, onChangeRefreshInterval,
     onRunQuery, onSaveQuery,
     onResetQuery,
-    onAddSeriesClause 
+    onAddSeriesClause
 }) {
     // handle drop event (selected fields)
     const handleDrop = (e) => {

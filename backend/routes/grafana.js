@@ -182,9 +182,9 @@ function buildFluxFromState(state) {
 
 // helper: deterministic "scratch" uid per user/org so we overwrite, not create every time
 function makeScratchUid(user = {}) {
-  const seed = `${user.grafanaUrl || ''}|${user.grafanaOrgId || ''}|${user.influxOrg || ''}`;
-  let h = crypto.createHash('sha1').update(seed).digest('base64').replace(/[+/=]/g, '').slice(0, 20);
-  return `influx_ui_scratch_${h}`; // <= 40 chars, letters/numbers/underscore
+    const seed = `${user.grafanaUrl || ''}|${user.grafanaOrgId || ''}|${user.influxOrg || ''}`;
+    let h = crypto.createHash('sha1').update(seed).digest('base64').replace(/[+/=]/g, '').slice(0, 20);
+    return `influx_ui_scratch_${h}`; // <= 40 chars, letters/numbers/underscore
 }
 
 // Ensure a Grafana InfluxDB v2 data source for the current user (uses req.user.*)
