@@ -23,4 +23,9 @@ app.use('/api/influx', influxRouter);
 app.use('/api/grafana', grafanaRouter);
 
 
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Only start the server when this file is run directly (not when imported by tests)
+if (require.main === module) {
+    app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+}
+
+module.exports = app;
